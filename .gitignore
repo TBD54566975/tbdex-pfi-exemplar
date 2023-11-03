@@ -1,0 +1,6 @@
+dist
+node_modules/
+.env
+.DS_STORE
+alice.json
+issuer.json
