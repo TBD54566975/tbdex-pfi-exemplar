@@ -83,15 +83,16 @@ const offering = Offering.create({
                 type: 'string',
                 pattern: '^SanctionCredential$'
               }
-            }/* Edit the following to add the issuer DID to the list of trusted issuers:
-            ,
-            {
-              path: ['$.issuer'],
-              filter: {
-                type: 'string',
-                const: 'did:key:z6MknMtNd82TjsUJHJfizXDU4vbU7TQLG4AiGUmJb1qBqwRS'
-              }
-            }*/
+            }
+            // uncommend the following with a valid issuer did from npm run example-create-issuer:
+            //,
+            //{
+            //  path: ['$.issuer'],
+            //  filter: {
+            //    type: 'string',
+            //    const: 'did:key:z6MkrA3GSkK3hxy4oQvezUSwTMR28Y97ZzYLHhBRjySLKfjB'
+            //  }
+            //}
           ]
         }
       }]
