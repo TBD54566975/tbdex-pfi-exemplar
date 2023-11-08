@@ -22,7 +22,7 @@ if (!signedCredential) {
 //
 const { data } = await TbdexHttpClient.getOfferings({ pfiDid: pfiDid })
 const [ offering ] = data
-//console.log('offering:', JSON.stringify(offering, null, 2))
+console.log('offering:', JSON.stringify(offering, null, 2))
 
 
 //
@@ -37,6 +37,8 @@ const kid = alice.document.verificationMethod[0].id
 //
 // And here we go with tbdex-protocol!
 //
+
+// First, Create an RFQ
 const rfq = Rfq.create({
   metadata: { from: alice.did, to: pfiDid },
   data: {
@@ -63,15 +65,14 @@ const rfq = Rfq.create({
 
 await rfq.sign(privateKeyJwk, kid)
 
-const rasp = await TbdexHttpClient.sendMessage({ message: rfq })
-console.log('send rfq response', JSON.stringify(rasp, null, 2))
-
-//console.log(rasp)
+const resp = await TbdexHttpClient.sendMessage({ message: rfq })
+console.log('send rfq response', JSON.stringify(resp, null, 2))
+console.log(resp)
 
 //
 //
 // All interaction with the PFI happens in the context of an exchange.
-// This is where for example a quote would show up in result to an RFQ.
+// This is where for example a quote would show up in result to an RFQ:
 const exchanges = await TbdexHttpClient.getExchanges({
   pfiDid: pfiDid,
   filter: { id: rfq.exchangeId },
@@ -80,14 +81,16 @@ const exchanges = await TbdexHttpClient.getExchanges({
 })
 
 
+//
+// Now lets get the quote out of the returned exchange
+//
 const [ exchange ] = exchanges.data
-
 for (const message of exchange) {
   if (message instanceof Quote) {
-    console.log('we have a quote')
+    console.log('we have a quote!')
     const quote = message as Quote
 
-    // place an order against that quote
+    // Place an order against that quote:
     const order = Order.create({
       metadata: { from: alice.did, to: pfiDid, exchangeId: quote.exchangeId },
     })
@@ -95,14 +98,16 @@ for (const message of exchange) {
     const orderResponse = await TbdexHttpClient.sendMessage({ message: order })
     console.log('orderResponse', orderResponse)
 
-    pollForStatus(order)
+    // finally we poll for response.
+    const finalState = await pollForStatus(order, pfiDid, privateKeyJwk, kid)
+    console.log('Final status:', finalState)
   }
 }
 
 /*
  * This is a very simple polling function that will poll for the status of an order.
  */
-async function pollForStatus(order) {
+async function pollForStatus(order, pfiDid, privateKeyJwk, kid) {
   const always = true
   while (always) {
     const exchanges = await TbdexHttpClient.getExchanges({
@@ -119,7 +124,7 @@ async function pollForStatus(order) {
         console.log('we have an order status')
         const orderStatus = message as OrderStatus
         console.log('orderStatus', orderStatus)
-        return
+        return orderStatus
       }
     }
   }
