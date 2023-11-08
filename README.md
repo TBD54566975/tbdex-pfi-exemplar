@@ -84,7 +84,7 @@ Take the customer DID string and the signed VC string (both long) and run:
 `npm run example-rfq $pfi_server_did $signed_vc`
 
 With the values from step 6 and step 5. 
-You will see the server print out the interaction between the customer and the PFI.
+You will see the server print out the interaction between the customer and the PFI, this will look up offers, ask for a quote, place an order and  finally check for status.
 
 Each interaction happens in the context of an "Exchange" which is a record of the interaction between the customer and the PFI.
 
