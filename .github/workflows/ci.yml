@@ -15,12 +15,11 @@ jobs:
       postgres:
         image: postgres:latest
         env:
-          POSTGRES_USER: youruser
-          POSTGRES_PASSWORD: yourpassword
-          POSTGRES_DB: yourdb
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: tbd
+          POSTGRES_DB: mockpfi
         ports:
           - 5432:5432
-        # Set health checks to wait until postgres has started
         options: >-
           --health-cmd pg_isready
           --health-interval 10s
@@ -29,7 +28,18 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [20.4.0]
+        node-version: ['20.4.0']
+
+    env:
+      ENV: production
+      LOG_LEVEL: info
+      HOST: http://localhost:9000
+      PORT: 9000
+      SEC_DB_HOST: postgres # Use the service name for the host
+      SEC_DB_PORT: 5432
+      SEC_DB_USER: postgres
+      SEC_DB_PASSWORD: tbd
+      SEC_DB_NAME: mockpfi
 
     steps:
     - uses: actions/checkout@v3
@@ -39,8 +49,9 @@ jobs:
         node-version: ${{ matrix.node-version }}
     - name: Install dependencies
       run: npm install
-    - name: Migrate database
-      run: ./db/scripts/migrate
+    - name: Run migration scripts
+      run: |
+        ./db/scripts/migrate
     - name: Seed offerings
       run: npm run seed-offerings
     - name: Run server and tests
