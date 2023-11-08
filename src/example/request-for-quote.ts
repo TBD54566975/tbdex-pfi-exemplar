@@ -1,4 +1,4 @@
-import { TbdexHttpClient, Rfq } from '@tbdex/http-client'
+import { TbdexHttpClient, Rfq, Quote, Order } from '@tbdex/http-client'
 import { createOrLoadDid } from './utils.js'
 
 //
@@ -22,7 +22,7 @@ if (!signedCredential) {
 //
 const { data } = await TbdexHttpClient.getOfferings({ pfiDid: pfiDid })
 const [ offering ] = data
-console.log('offering:', JSON.stringify(offering, null, 2))
+//console.log('offering:', JSON.stringify(offering, null, 2))
 
 
 //
@@ -66,6 +66,8 @@ await rfq.sign(privateKeyJwk, kid)
 const rasp = await TbdexHttpClient.sendMessage({ message: rfq })
 console.log('send rfq response', JSON.stringify(rasp, null, 2))
 
+//console.log(rasp)
+
 //
 //
 // All interaction with the PFI happens in the context of an exchange.
@@ -77,6 +79,25 @@ const exchanges = await TbdexHttpClient.getExchanges({
   kid
 })
 
-console.log('exchanges', JSON.stringify(exchanges, null, 2))
+
+const [ exchange ] = exchanges.data
+
+for (const message of exchange) {
+  if (message instanceof Quote) {
+    console.log('we have a quote')
+    const quote = message as Quote
+
+    // place an order against that quote
+    const order = Order.create({
+      metadata: { from: alice.did, to: pfiDid, exchangeId: quote.exchangeId },
+    })
+    await order.sign(privateKeyJwk, kid)
+    const orderResponse = await TbdexHttpClient.sendMessage({ message: order })
+    console.log('orderResponse', orderResponse)
+
+  }
+}
+
+
 
 
