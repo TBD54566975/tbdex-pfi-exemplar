@@ -8,7 +8,7 @@ import { config } from './config.js'
 import { Postgres, ExchangeRespository, OfferingRepository } from './db/index.js'
 import { HttpServerShutdownHandler } from './http-shutdown-handler.js'
 import { TbdexHttpServer } from '@tbdex/http-server'
-import fs from 'node:fs'
+
 
 process.on('unhandledRejection', (reason: any, promise) => {
   log.error(`Unhandled promise rejection. Reason: ${reason}. Promise: ${JSON.stringify(promise)}. Stack: ${reason.stack}`)
@@ -51,8 +51,6 @@ const server = httpApi.listen(config.port, () => {
 })
 
 console.log('PFI DID: ', config.did.id)
-
-
 console.log('PFI DID KEY: ', JSON.stringify(config.did.privateKey))
 console.log('PFI KID: ', config.did.kid)
 
