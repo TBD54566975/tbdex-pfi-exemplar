@@ -8,6 +8,7 @@ import { config } from './config.js'
 import { Postgres, ExchangeRespository, OfferingRepository } from './db/index.js'
 import { HttpServerShutdownHandler } from './http-shutdown-handler.js'
 import { TbdexHttpServer } from '@tbdex/http-server'
+import * as fs from 'fs'
 
 process.on('unhandledRejection', (reason: any, promise) => {
   log.error(`Unhandled promise rejection. Reason: ${reason}. Promise: ${JSON.stringify(promise)}. Stack: ${reason.stack}`)
@@ -31,8 +32,6 @@ process.on('SIGTERM', async () => {
   gracefulShutdown()
 })
 
-// await Postgres.ping()
-
 const httpApi = new TbdexHttpServer({ exchangesApi: ExchangeRespository, offeringsApi: OfferingRepository })
 
 httpApi.submit('rfq', async (ctx, rfq) => {
@@ -52,6 +51,9 @@ const server = httpApi.listen(config.port, () => {
 })
 
 console.log('PFI DID: ', config.did.id)
+fs.writeFileSync('server-did.txt', config.did.id)
+
+
 console.log('PFI DID KEY: ', JSON.stringify(config.did.privateKey))
 console.log('PFI KID: ', config.did.kid)
 

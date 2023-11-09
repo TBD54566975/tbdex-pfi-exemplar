@@ -4,3 +4,4 @@ node_modules/
 .DS_STORE
 alice.json
 issuer.json
+server-did.txt
