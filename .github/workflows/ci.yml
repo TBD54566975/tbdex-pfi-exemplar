@@ -30,17 +30,6 @@ jobs:
       matrix:
         node-version: ['20.4.0']
 
-    env:
-      ENV: production
-      LOG_LEVEL: info
-      HOST: http://localhost:9000
-      PORT: 9000
-      #SEC_DB_HOST: postgres # Use the service name for the host
-      #SEC_DB_PORT: 5432
-      #SEC_DB_USER: postgres
-      #SEC_DB_PASSWORD: tbd
-      #SEC_DB_NAME: mockpfi
-
     steps:
     - uses: actions/checkout@v3
     - name: Use Node.js ${{ matrix.node-version }}
