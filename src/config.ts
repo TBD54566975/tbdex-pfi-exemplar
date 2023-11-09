@@ -51,7 +51,7 @@ if (!config.did.id) {
   const DidIon = await DidIonMethod.create({
     services: [{ id: 'pfi', type: 'PFI', serviceEndpoint: config.host }]
   })
-  
+
 
   config.did.id = DidIon.did
   fs.writeFileSync('server-did.txt', config.did.id)
