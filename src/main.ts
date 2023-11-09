@@ -8,7 +8,7 @@ import { config } from './config.js'
 import { Postgres, ExchangeRespository, OfferingRepository } from './db/index.js'
 import { HttpServerShutdownHandler } from './http-shutdown-handler.js'
 import { TbdexHttpServer } from '@tbdex/http-server'
-import * as fs from 'fs'
+import fs from 'node:fs'
 
 process.on('unhandledRejection', (reason: any, promise) => {
   log.error(`Unhandled promise rejection. Reason: ${reason}. Promise: ${JSON.stringify(promise)}. Stack: ${reason.stack}`)
