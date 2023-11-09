@@ -51,7 +51,6 @@ const server = httpApi.listen(config.port, () => {
 })
 
 console.log('PFI DID: ', config.did.id)
-fs.writeFileSync('server-did.txt', config.did.id)
 
 
 console.log('PFI DID KEY: ', JSON.stringify(config.did.privateKey))
