@@ -9,6 +9,7 @@ import { Postgres, ExchangeRespository, OfferingRepository } from './db/index.js
 import { HttpServerShutdownHandler } from './http-shutdown-handler.js'
 import { TbdexHttpServer } from '@tbdex/http-server'
 
+
 process.on('unhandledRejection', (reason: any, promise) => {
   log.error(`Unhandled promise rejection. Reason: ${reason}. Promise: ${JSON.stringify(promise)}. Stack: ${reason.stack}`)
 })
@@ -30,8 +31,6 @@ process.on('SIGTERM', async () => {
 
   gracefulShutdown()
 })
-
-// await Postgres.ping()
 
 const httpApi = new TbdexHttpServer({ exchangesApi: ExchangeRespository, offeringsApi: OfferingRepository })
 

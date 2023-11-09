@@ -1,6 +1,7 @@
 import type { PoolConfig } from 'pg'
 
 import type { LogLevelDesc } from 'loglevel'
+import fs from 'node:fs'
 
 import 'dotenv/config'
 
@@ -51,7 +52,9 @@ if (!config.did.id) {
     services: [{ id: 'pfi', type: 'PFI', serviceEndpoint: config.host }]
   })
 
+
   config.did.id = DidIon.did
+  fs.writeFileSync('server-did.txt', config.did.id)
   config.did.privateKey = DidIon.keySet.verificationMethodKeys[0].privateKeyJwk
   config.did.kid = `${config.did.id}#${config.did.privateKey.kid}`
 }
