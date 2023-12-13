@@ -1,0 +1,47 @@
+{
+  "pfi": {
+    "uri": "did:key:z6MkpNadT5bt4wCdBRMTSfdjmb9TsYCyXcDGTfV1eEsad88d",
+    "privateKeyJwk": {
+      "d": "-Prle8d05jKCRh9_AY2b5G82iv5-WsmiiGzH3jYXiiA",
+      "alg": "EdDSA",
+      "crv": "Ed25519",
+      "kty": "OKP",
+      "ext": "true",
+      "key_ops": [
+        "sign"
+      ],
+      "x": "k2H6W-BpdNfN98AFB0frbZVUOXCJ6PiaqspjilEN2WY"
+    },
+    "kid": "did:key:z6MkpNadT5bt4wCdBRMTSfdjmb9TsYCyXcDGTfV1eEsad88d#z6MkpNadT5bt4wCdBRMTSfdjmb9TsYCyXcDGTfV1eEsad88d"
+  },
+  "issuer": {
+    "uri": "did:key:z6Mkm3zZ1PSu9VyStBHdjNE2gu3eJht8EyBQ7ZwmNitYYMKj",
+    "privateKeyJwk": {
+      "d": "C4rgbZofyuOo2iQkgJE8OpSDFuPDF7gFYLG2jLC_rLU",
+      "alg": "EdDSA",
+      "crv": "Ed25519",
+      "kty": "OKP",
+      "ext": "true",
+      "key_ops": [
+        "sign"
+      ],
+      "x": "YgvunRJdu3NBsstsnRL6jArNnnOMy24Qlj89xdy7HnY"
+    },
+    "kid": "did:key:z6Mkm3zZ1PSu9VyStBHdjNE2gu3eJht8EyBQ7ZwmNitYYMKj#z6Mkm3zZ1PSu9VyStBHdjNE2gu3eJht8EyBQ7ZwmNitYYMKj"
+  },
+  "client": {
+    "uri": "did:key:z6Mkj9EGofvW2VEA7Uo4ffN95by9ZXdfiEfTdmmWDmtvmKtG",
+    "privateKeyJwk": {
+      "d": "FTxIW5-rqhFMVC__QpYfgCiBQsMqKtDFonwr87AjvOg",
+      "alg": "EdDSA",
+      "crv": "Ed25519",
+      "kty": "OKP",
+      "ext": "true",
+      "key_ops": [
+        "sign"
+      ],
+      "x": "Rav57Oh3-6FX_s72ar7qknmvNm_TLxIvSnYBxyeUMDU"
+    },
+    "kid": "did:key:z6Mkj9EGofvW2VEA7Uo4ffN95by9ZXdfiEfTdmmWDmtvmKtG#z6Mkj9EGofvW2VEA7Uo4ffN95by9ZXdfiEfTdmmWDmtvmKtG"
+  }
+}

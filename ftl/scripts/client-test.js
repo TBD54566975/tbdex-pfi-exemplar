@@ -54,13 +54,16 @@ const submitRfq = async (offeringId) => {
 
   await rfq.sign(privateKeyJwk, kid)
 
-  await fetch(`http://localhost:8892/ingress/exchanges/${rfq.metadata.exchangeId}/rfq`, {
+  const res = await fetch(`http://localhost:8892/ingress/exchanges/${rfq.metadata.exchangeId}/rfq`, {
     method: 'POST',
     body: JSON.stringify({
       rfq: JSON.stringify(rfq)
     })
   })
+
+  if (!res.ok) throw Error('Failed to submit rfq')
 }
 
 getOfferings()
   .then(submitRfq)
+  .then(() => console.log('Success!'))
