@@ -14,13 +14,13 @@ source ./bin/activate-hermit
 
 ### 2. Start your FTL cluster 
 
-```shell
-ftl serve 
-```
-
 > [!NOTE]
 >
 > `ftl serve --recreate` will recreate the FTL cluster from a fresh state, i.e. delete all deployed modules
+
+```shell
+ftl serve 
+```
 
 ### 3. In a new shell, start the development server
 
