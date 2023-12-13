@@ -30,4 +30,8 @@ ftl serve
 >
 > Alternatively, if you don't want to hot-reload, you can manually deploy FTL modules using the `ftl deploy` command (ex: `ftl deploy ftl-module-offerings`)
 
+```shell
+ftl dev .
+```
+
 ### 4. Go to http://localhost:8892/ in your web browser
