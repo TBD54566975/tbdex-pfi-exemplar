@@ -1,5 +1,19 @@
 # tbdex-pfi-exemplar/ftl
 
+## Setup
+
+### 1. Start Postgres & Run Migrations
+
+```shell
+(cd ../db/scripts; ./start-pg; ./migrate)
+```
+
+### 2. Seed database
+
+```shell
+(cd ../; npm i; npm run seed-offerings)
+```
+
 ## Getting Started
 
 ### 1. Activate [Hermit](https://cashapp.github.io/hermit/usage/get-started/)
@@ -29,6 +43,8 @@ ftl serve
 > This will begin hot-reloading (watching for any code changes, and automatically re-deploying)
 >
 > Alternatively, if you don't want to hot-reload, you can manually deploy FTL modules using the `ftl deploy` command (ex: `ftl deploy ftl-module-offerings`)
+>
+> Changes to the `lib/` will not automatically redeploy any modules
 
 ```shell
 ftl dev .
