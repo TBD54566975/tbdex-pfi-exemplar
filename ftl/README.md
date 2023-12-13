@@ -2,7 +2,7 @@
 
 ## Getting Started
 
-1. Activate [Hermit](https://cashapp.github.io/hermit/usage/get-started/)
+### 1. Activate [Hermit](https://cashapp.github.io/hermit/usage/get-started/)
 
 > [!NOTE]
 >
@@ -12,7 +12,7 @@
 source ./bin/activate-hermit
 ```
 
-2. Start your FTL cluster 
+### 2. Start your FTL cluster 
 
 ```shell
 ftl serve 
@@ -22,7 +22,7 @@ ftl serve
 >
 > `ftl serve --recreate` will recreate the FTL cluster from a fresh state, i.e. delete all deployed modules
 
-3. In a new shell, start the development server
+### 3. In a new shell, start the development server
 
 > [!NOTE]
 >
@@ -30,4 +30,4 @@ ftl serve
 >
 > Alternatively, if you don't want to hot-reload, you can manually deploy FTL modules using the `ftl deploy` command (ex: `ftl deploy ftl-module-offerings`)
 
-4. Go to http://localhost:8892/ in your web browser
+### 4. Go to http://localhost:8892/ in your web browser
