@@ -19,29 +19,21 @@ class Exchanges {
     fun submitRfq(context: Context, req: SubmitRfqRequest): SubmitRfqResponse {
         // todo middleware validation from tbdex-kt/httpserver
 
-        // insert into db
-        // go ahead and create quote & insert into db
-        try {
-            println(req.rfq)
-            val rfq = Json.parse(req.rfq, Rfq::class.java)
+        val rfq = Json.parse(req.rfq, Rfq::class.java)
 
-            val sql = """
-                INSERT INTO exchange (exchangeid, messageid, subject, messagekind, message)
-                VALUES (?, ?, ?, ?, ?::json)
-            """.trimIndent()
+        val sql = """
+            INSERT INTO exchange (exchangeid, messageid, subject, messagekind, message)
+            VALUES (?, ?, ?, ?, ?::json)
+        """.trimIndent()
 
-            val pstmt = postgresClient.connection.prepareStatement(sql).apply {
-                setString(1, rfq.metadata.exchangeId.toString())
-                setString(2, rfq.metadata.id.toString())
-                setString(3, rfq.metadata.from)
-                setString(4, rfq.metadata.kind.toString())
-                setString(5, Json.stringify(rfq))
-            }
-
-            pstmt.executeUpdate()
-            println("Record inserted successfully.")
-        } catch (ex: Exception) {
-          println(ex)
+        val pstmt = postgresClient.connection.prepareStatement(sql).apply {
+            setString(1, rfq.metadata.exchangeId.toString())
+            setString(2, rfq.metadata.id.toString())
+            setString(3, rfq.metadata.from)
+            setString(4, rfq.metadata.kind.toString())
+            setString(5, Json.stringify(rfq))
         }
-  }
+
+        pstmt.executeUpdate()
+    }
 }
