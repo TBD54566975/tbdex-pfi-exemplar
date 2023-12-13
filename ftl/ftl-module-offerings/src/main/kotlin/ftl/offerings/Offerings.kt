@@ -1,5 +1,6 @@
 package ftl.offerings
 
+import ftl.lib.Json
 import xyz.block.ftl.Context
 import xyz.block.ftl.Ingress
 import xyz.block.ftl.Method
@@ -11,6 +12,6 @@ data class OfferingsResponse(val message: String)
 class Offerings {
   @Verb
   fun echo(context: Context, req: OfferingsRequest): OfferingsResponse {
-    return OfferingsResponse(message = "Hello, ${req.name}!")
+    return OfferingsResponse(message = "Hello, ${req.name}! ${Json.stringify(req)}")
   }
 }

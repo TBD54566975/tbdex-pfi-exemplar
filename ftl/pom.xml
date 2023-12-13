@@ -9,6 +9,7 @@
     <packaging>pom</packaging>
 
     <modules>
+        <module>lib</module>
         <module>ftl-module-offerings</module>
         <module>ftl-module-exchanges</module>
     </modules>
@@ -32,6 +33,11 @@
             <groupId>xyz.block</groupId>
             <artifactId>ftl-runtime</artifactId>
             <version>${ftl.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>ftl</groupId>
+            <artifactId>lib</artifactId>
+            <version>1.0-SNAPSHOT</version>
         </dependency>
     </dependencies>
 
