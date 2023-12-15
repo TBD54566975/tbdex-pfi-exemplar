@@ -1,11 +1,14 @@
 package ftl.pfi
 
+import com.nimbusds.jose.Algorithm
+import com.nimbusds.jose.jwk.Curve
 import com.nimbusds.jose.jwk.JWK
 import ftl.lib.Json
 import ftl.lib.PostgresClient
 import tbdex.sdk.protocol.models.*
 import web5.sdk.crypto.InMemoryKeyManager
-import web5.sdk.dids.DidKey
+import web5.sdk.dids.methods.key.CreateDidKeyOptions
+import web5.sdk.dids.methods.key.DidKey
 import xyz.block.ftl.Context
 import xyz.block.ftl.Ingress
 import xyz.block.ftl.Method
@@ -30,21 +33,22 @@ class Pfi {
 
     init {
         keyManager = InMemoryKeyManager()
-//        keyManager.generatePrivateKey(JWSAlgorithm.EdDSA, Curve.Ed25519)
+//        keyManager.generatePrivateKey(Algorithm("EdDSA"), Curve("Ed25519"))
         keyManager.import(JWK.parse("""
             {
-              "kty": "EC",
-              "d": "ObZnT863Zo8l4IUpjXdwQnJCWYYdIRz8oL2iP2YtGcE",
+              "kty": "OKP",
+              "d": "UbrVjYbC9n1ytJ5KglfEykBiKMQUZJOwcX8Vb3w5rto",
               "use": "sig",
-              "crv": "secp256k1",
-              "kid": "jSc9GweDpzbUTlrnw2UFFzROLDR-AHJNzdP3AICeuTk",
-              "x": "AejkSFx3tb5o3_9gPaRaMS3ix2Z_2k41pfRCWwjhcdM",
-              "y": "KN7bMi_oMr2l8MsNm5eovIckCnBmPJcpv48RPP4Vtyo",
-              "alg": "ES256K"
+              "crv": "Ed25519",
+              "kid": "uWbXY8FXf9S6t7gd9grB9-SCCYJy_uI2ea3dpnLZpiw",
+              "x": "SQid0aocnw3Ea8VMBhS-U2n-vKD7jFqDmwvqskxDQJo",
+              "alg": "EdDSA"
             }
         """.trimIndent()))
-//        didKey = DidKey.create(keyManager)
-        didKey = DidKey("did:key:zQ3shtpZRkkSSoAu461yCWoprySM19cXhqCMKaPu7yQ5AJrv7", keyManager)
+
+        didKey = DidKey.load("did:key:z6MkjNMRmdDYN8ZK4GcLwokmcHy7edsUzea5uBaebZLVeYNM", keyManager)
+//        didKey = DidKey.create(keyManager, CreateDidKeyOptions(Algorithm("EdDSA"), Curve("Ed25519")))
+//        didKey = DidKey("did:key:zQ3shtpZRkkSSoAu461yCWoprySM19cXhqCMKaPu7yQ5AJrv7", keyManager)
     }
 
     @Verb
@@ -53,6 +57,7 @@ class Pfi {
         try {
             val exported = keyManager.export()
             println(Json.stringify(exported))
+            println(didKey.uri)
 
             val offerings: MutableList<Offering> = mutableListOf()
 
