@@ -10,8 +10,7 @@
 
     <modules>
         <module>lib</module>
-        <module>ftl-module-offerings</module>
-        <module>ftl-module-exchanges</module>
+        <module>ftl-module-pfi</module>
     </modules>
 
     <properties>
