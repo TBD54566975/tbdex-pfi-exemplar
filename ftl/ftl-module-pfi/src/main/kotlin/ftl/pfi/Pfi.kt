@@ -22,6 +22,9 @@ typealias SubmitRfqResponse = Unit // todo should include errors
 typealias GetExchangesRequest = Unit
 data class GetExchangesResponse(val exchanges: String)
 
+data class SubmitOrderRequest(val order: String)
+typealias SubmitOrderResponse = Unit // todo should include errors
+
 class Pfi {
     private val postgresClient = PostgresClient()
     private val didKey: DidKey
@@ -144,8 +147,6 @@ class Pfi {
         while (resultSet.next()) {
             val exchangeId = resultSet.getString("exchangeid")
             val message = resultSet.getString("message")
-
-            println(message)
             messages.computeIfAbsent(exchangeId) { mutableListOf() }.add(Message.parse(message))
         }
 
@@ -153,5 +154,21 @@ class Pfi {
         postgresClient.close()
 
         return GetExchangesResponse(Json.stringify(messages.values.toList()))
+    }
+
+    @Verb
+    @Ingress(Method.POST, "/exchanges/{exchangeId}/order")
+    fun submitOrder(context: Context, req: SubmitOrderRequest): SubmitOrderResponse {
+        // todo middleware validation from tbdex-kt/httpserver
+
+        val order = Json.parse(req.order, Order::class.java)
+        insertExchange(order)
+
+        val orderStatus = OrderStatus.create(
+            order.metadata.from, didKey.uri, order.metadata.exchangeId, OrderStatusData("COMPLETED"))
+        orderStatus.sign(didKey)
+        insertExchange(orderStatus)
+
+        postgresClient.close()
     }
 }

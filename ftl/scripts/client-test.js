@@ -1,4 +1,4 @@
-import { DevTools, Rfq } from '@tbdex/http-client'
+import { DevTools, Order, Rfq } from '@tbdex/http-client'
 
 // this is fine hard coded for now
 const PFI_DID = 'did:key:z6MkjNMRmdDYN8ZK4GcLwokmcHy7edsUzea5uBaebZLVeYNM'
@@ -55,7 +55,6 @@ const submitRfq = async (offeringId) => {
       claims: [signedCredential]
     }
   })
-
   await rfq.sign(privateKeyJwk, kid)
 
   const res = await fetch(`http://localhost:8892/ingress/exchanges/${rfq.metadata.exchangeId}/rfq`, {
@@ -64,7 +63,6 @@ const submitRfq = async (offeringId) => {
       rfq: JSON.stringify(rfq)
     })
   })
-
   if (!res.ok) throw Error('Failed to submit rfq')
 
   return rfq.exchangeId
@@ -80,17 +78,44 @@ const getQuote = async (exchangeId) => {
   const exchanges = JSON.parse(body.exchanges)
   const quote = exchanges.find(x => x[0].metadata.exchangeId === exchangeId).find(x => x.metadata.kind === 'quote')
 
-  console.log(JSON.stringify(quote, null, 2))
-
   return quote.metadata.exchangeId
 }
 
 const submitOrder = async (exchangeId) => {
-  console.log(exchangeId)
+  console.log('Submitting Order...')
+
+  const order = Order.create({
+    metadata: { from: alice.did, to: PFI_DID, exchangeId }
+  })
+  await order.sign(privateKeyJwk, kid)
+
+  const res = await fetch(`http://localhost:8892/ingress/exchanges/${order.metadata.exchangeId}/order`, {
+    method: 'POST',
+    body: JSON.stringify({
+      order: JSON.stringify(order)
+    })
+  })
+  if (!res.ok) throw Error('Failed to submit rfq')
+
+  return order.exchangeId
+}
+
+const getOrderStatus = async (exchangeId) => {
+  console.log('Getting OrderStatus...')
+
+  const res = await fetch('http://localhost:8892/ingress/exchanges')
+  if (!res.ok) throw Error('Failed to get quote', res.status)
+
+  const body = await res.json()
+  const exchanges = JSON.parse(body.exchanges)
+  const orderStatus = exchanges.find(x => x[0].metadata.exchangeId === exchangeId).find(x => x.metadata.kind === 'orderstatus')
+
+  console.log('OrderStatus:', orderStatus.data.orderStatus)
 }
 
 getOfferings()
   .then(submitRfq)
   .then(getQuote)
   .then(submitOrder)
+  .then(getOrderStatus)
   .then(() => console.log('Success!'))
