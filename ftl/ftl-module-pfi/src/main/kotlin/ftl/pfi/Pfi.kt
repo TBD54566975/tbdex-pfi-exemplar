@@ -31,21 +31,16 @@ class Pfi {
     @Verb
     @Ingress(Method.GET, "/offerings")
     fun getOfferings(context: Context, req: GetOfferingsRequest): GetOfferingsResponse {
-        try {
-            val offerings: MutableList<Offering> = offeringsRepository.selectOfferings()
+        val offerings: MutableList<Offering> = offeringsRepository.selectOfferings()
 
-            if (offerings.isEmpty()) {
-                val offering = sampleTbdexService.getOffering(didService.getUri())
-                offering.sign(didService.getDid())
-                offeringsRepository.insertOffering(offering)
-                offerings.add(offering)
-            }
-
-            return GetOfferingsResponse(Json.stringify(offerings))
-        } catch (ex: Exception) {
-            println(ex)
-            throw ex
+        if (offerings.isEmpty()) {
+            val offering = sampleTbdexService.getOffering(didService.getUri())
+            offering.sign(didService.getDid())
+            offeringsRepository.insertOffering(offering)
+            offerings.add(offering)
         }
+
+        return GetOfferingsResponse(Json.stringify(offerings))
     }
 
     @Verb
