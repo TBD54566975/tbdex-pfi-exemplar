@@ -1,20 +1,17 @@
 package ftl.pfi
 
-import com.nimbusds.jose.Algorithm
-import com.nimbusds.jose.jwk.Curve
 import com.nimbusds.jose.jwk.JWK
+import de.fxlae.typeid.TypeId
 import ftl.lib.Json
 import ftl.lib.PostgresClient
 import tbdex.sdk.protocol.models.*
 import web5.sdk.crypto.InMemoryKeyManager
-import web5.sdk.dids.methods.key.CreateDidKeyOptions
 import web5.sdk.dids.methods.key.DidKey
 import xyz.block.ftl.Context
 import xyz.block.ftl.Ingress
 import xyz.block.ftl.Method
 import xyz.block.ftl.Verb
 import java.time.OffsetDateTime
-import java.time.ZoneOffset
 
 typealias GetOfferingsRequest = Unit
 data class GetOfferingsResponse(val offerings: String)
@@ -22,7 +19,7 @@ data class GetOfferingsResponse(val offerings: String)
 data class SubmitRfqRequest(val rfq: String)
 typealias SubmitRfqResponse = Unit // todo should include errors
 
-data class GetExchangesRequest(val messageType: String)
+typealias GetExchangesRequest = Unit
 data class GetExchangesResponse(val exchanges: String)
 
 class Pfi {
@@ -31,29 +28,26 @@ class Pfi {
 
     init {
         val keyManager = InMemoryKeyManager()
+        // todo obv this shouldn't be in git XD
         keyManager.import(JWK.parse("""
             {
               "kty": "OKP",
-              "d": "UbrVjYbC9n1ytJ5KglfEykBiKMQUZJOwcX8Vb3w5rto",
+              "d": "YGsM3HeGRu03nwAed-1BzBkVrcwqJ_YRwqvbOXTCM6g",
               "use": "sig",
               "crv": "Ed25519",
-              "kid": "uWbXY8FXf9S6t7gd9grB9-SCCYJy_uI2ea3dpnLZpiw",
-              "x": "SQid0aocnw3Ea8VMBhS-U2n-vKD7jFqDmwvqskxDQJo",
+              "kid": "U-tdS83vLqXthjWKmDMYg9IOkpNtRI4XVEB_DIynKEU",
+              "x": "sAT-reavVgGfzXnL-oLY7lqK1uBHkWAKkKqInBgUmAs",
               "alg": "EdDSA"
             }
         """.trimIndent()))
-
-        didKey = DidKey.load("did:key:z6MkjNMRmdDYN8ZK4GcLwokmcHy7edsUzea5uBaebZLVeYNM", keyManager)
+        didKey = DidKey.load("did:key:z6MkrJNDakwUm42f8rLM8FAqadBkzztnc1P6DRyAqC1U5ZLn", keyManager)
     }
 
-    private fun signAndInsertExchange(message: Message) {
-        val sql = """
+    private fun insertExchange(message: Message) {
+        val statement = postgresClient.connection.prepareStatement("""
             INSERT INTO exchange (exchangeid, messageid, subject, messagekind, message)
             VALUES (?, ?, ?, ?, ?::json)
-        """.trimIndent()
-
-        message.sign(didKey)
-        val statement = postgresClient.connection.prepareStatement(sql)
+        """.trimIndent())
             .apply {
                 setString(1, message.metadata.exchangeId.toString())
                 setString(2, message.metadata.id.toString())
@@ -70,14 +64,14 @@ class Pfi {
     fun getOfferings(context: Context, req: GetOfferingsRequest): GetOfferingsResponse {
         val offerings: MutableList<Offering> = mutableListOf()
 
-        val select = postgresClient.connection.createStatement()
-        val rs = select.executeQuery("SELECT * FROM offering")
+        val selectStatement = postgresClient.connection.prepareStatement("SELECT * FROM offering")
+        val resultSet = selectStatement.executeQuery()
 
-        if (!rs.next()) {
+        if (!resultSet.next()) {
             val offering = createOffering(didKey.uri)
             offering.sign(didKey)
 
-            val insert = postgresClient.connection.prepareStatement(
+            val insertStatement = postgresClient.connection.prepareStatement(
                 "INSERT INTO offering (offeringid, payoutcurrency, payincurrency, offering) VALUES (?, ?, ?, ?::json)"
             ).apply {
                 setString(1, offering.metadata.id.toString())
@@ -85,16 +79,18 @@ class Pfi {
                 setString(3, offering.data.payoutCurrency.currencyCode)
                 setString(4, Json.stringify(offering))
             }
-            insert.executeUpdate()
-            insert.close()
+            insertStatement.executeUpdate()
+            insertStatement.close()
 
             offerings.add(offering)
         } else {
             do {
-                val offering = Offering.parse(rs.getString("offering"))
+                val offering = Offering.parse(resultSet.getString("offering"))
                 offerings.add(offering)
-            } while (rs.next())
+            } while (resultSet.next())
         }
+
+        selectStatement.close()
 
         postgresClient.close()
 
@@ -107,32 +103,55 @@ class Pfi {
         // todo middleware validation from tbdex-kt/httpserver
 
         val rfq = Json.parse(req.rfq, Rfq::class.java)
-        signAndInsertExchange(rfq)
+        insertExchange(rfq)
 
         val quote = Quote.create(
-            to = rfq.metadata.from,
-            from = didKey.uri,
-            exchangeId = rfq.metadata.exchangeId,
-            quoteData = QuoteData(
-                expiresAt = OffsetDateTime.of(2023, 12, 1, 0, 0, 0, 0, ZoneOffset.UTC),
-                payin = QuoteDetails(
-                    currencyCode = "USD",
-                    amountSubunits = "100"
-                ),
-                payout = QuoteDetails(
-                    currencyCode = "USD",
-                    amountSubunits = "100"
+            rfq.metadata.from, didKey.uri, rfq.metadata.exchangeId,
+            //TypeId.generate(MessageKind.rfq.name),
+            QuoteData(
+                expiresAt = OffsetDateTime.now().plusDays(1),
+                payin = QuoteDetails("AUD", "1000", "1"),
+                payout = QuoteDetails("BTC", "12", "2"),
+                paymentInstructions = PaymentInstructions(
+                    payin = PaymentInstruction(
+                        link = "https://block.xyz",
+                        instruction = "payin instruction"
+                    ),
+                    payout = PaymentInstruction(
+                        link = "https://block.xyz",
+                        instruction = "payout instruction"
+                    )
                 )
             )
         )
-        signAndInsertExchange(quote)
+        quote.sign(didKey)
+        insertExchange(quote)
+
+        postgresClient.close()
     }
 
     @Verb
-    @Ingress(Method.GET, "/exchanges/{exchangeId}?messageType={messageType}")
+    @Ingress(Method.GET, "/exchanges")
     fun getExchanges(context: Context, req: GetExchangesRequest): GetExchangesResponse {
+        // todo client's DID is in the Authorization header's bearer token; used to filter exchanges only for the given client
 
+        val messages = mutableMapOf<String, MutableList<Message>>()
+        val statement = postgresClient.connection.prepareStatement(
+            "SELECT exchangeid, message FROM exchange ORDER BY createdat ASC")
 
-        return GetExchangesResponse("hello world")
+        val resultSet = statement.executeQuery()
+
+        while (resultSet.next()) {
+            val exchangeId = resultSet.getString("exchangeid")
+            val message = resultSet.getString("message")
+
+            println(message)
+            messages.computeIfAbsent(exchangeId) { mutableListOf() }.add(Message.parse(message))
+        }
+
+        statement.close()
+        postgresClient.close()
+
+        return GetExchangesResponse(Json.stringify(messages.values.toList()))
     }
 }

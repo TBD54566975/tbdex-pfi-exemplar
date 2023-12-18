@@ -42,8 +42,8 @@ val REQUIRED_PAYMENT_DETAILS = Json.parse(
     """.trimIndent(),
     JsonNode::class.java)
 
-fun createOffering(uri: String): Offering {
-    return Offering.create(
+fun createOffering(uri: String): Offering =
+    Offering.create(
         from = uri,
         OfferingData(
             description = "A sample offering",
@@ -78,4 +78,3 @@ fun createOffering(uri: String): Offering {
             ),
         )
     )
-}

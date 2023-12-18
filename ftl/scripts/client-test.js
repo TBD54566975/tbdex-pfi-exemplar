@@ -1,7 +1,7 @@
 import { DevTools, Rfq } from '@tbdex/http-client'
 
-// this is fine hard coded for now, so long as it resolves to our FTL cluster http://localhost:8892/ingress
-const PFI_DID = 'did:ion:EiDEhuIcZXZQzHj2sgsBzIlaYZjSDAQmlOJ9hkvfRbkwhw:eyJkZWx0YSI6eyJwYXRjaGVzIjpbeyJhY3Rpb24iOiJyZXBsYWNlIiwiZG9jdW1lbnQiOnsicHVibGljS2V5cyI6W3siaWQiOiJkd24tc2lnIiwicHVibGljS2V5SndrIjp7ImNydiI6IkVkMjU1MTkiLCJrdHkiOiJPS1AiLCJ4IjoiRkxKalNBNi04R1RmOE1zMDMtTWhub2lLUTFQeHFDUWg3ZTJGck9MQTRFdyJ9LCJwdXJwb3NlcyI6WyJhdXRoZW50aWNhdGlvbiIsImFzc2VydGlvbk1ldGhvZCJdLCJ0eXBlIjoiSnNvbldlYktleTIwMjAifV0sInNlcnZpY2VzIjpbeyJpZCI6InBmaSIsInNlcnZpY2VFbmRwb2ludCI6Imh0dHA6Ly9sb2NhbGhvc3Q6ODg5Mi9pbmdyZXNzIiwidHlwZSI6IlBGSSJ9XX19XSwidXBkYXRlQ29tbWl0bWVudCI6IkVpQi1GQ21BV0kyNnRMOHIzQ1RHdkdUY25qanpMSUtwbmNobjhMRXFGTnozdFEifSwic3VmZml4RGF0YSI6eyJkZWx0YUhhc2giOiJFaUFOaUdfMHM3MVp2VDBtbE9Kc0h3UVZ3REI4cDNILWp5c2xka3dIT0ZkNWZBIiwicmVjb3ZlcnlDb21taXRtZW50IjoiRWlCSlI1cklOaDQyTXRGTGRIR2lTUlVBdkJHZ3BxOVNlcU9vMWJkYV9iT1ZhQSJ9fQ'
+// this is fine hard coded for now
+const PFI_DID = 'did:key:z6MkjNMRmdDYN8ZK4GcLwokmcHy7edsUzea5uBaebZLVeYNM'
 
 // this is fine to create each time
 const issuer = await DevTools.createDid()
@@ -12,6 +12,8 @@ const { privateKeyJwk } = alice.keySet.verificationMethodKeys[0]
 const kid = alice.document.verificationMethod[0].id
 
 const getOfferings = async () => {
+  console.log('Getting offerings...')
+
   const res = await fetch('http://localhost:8892/ingress/offerings')
   const body = await res.json()
   const offerings = JSON.parse(body.offerings)
@@ -19,6 +21,8 @@ const getOfferings = async () => {
 }
 
 const submitRfq = async (offeringId) => {
+  console.log('Submitting RFQ...')
+
   const { signedCredential } = await DevTools.createCredential({
     type    : 'SanctionCredential',
     issuer  : issuer,
@@ -62,8 +66,31 @@ const submitRfq = async (offeringId) => {
   })
 
   if (!res.ok) throw Error('Failed to submit rfq')
+
+  return rfq.exchangeId
+}
+
+const getQuote = async (exchangeId) => {
+  console.log('Getting Quote...')
+
+  const res = await fetch('http://localhost:8892/ingress/exchanges')
+  if (!res.ok) throw Error('Failed to get quote', res.status)
+
+  const body = await res.json()
+  const exchanges = JSON.parse(body.exchanges)
+  const quote = exchanges.find(x => x[0].metadata.exchangeId === exchangeId).find(x => x.metadata.kind === 'quote')
+
+  console.log(JSON.stringify(quote, null, 2))
+
+  return quote.metadata.exchangeId
+}
+
+const submitOrder = async (exchangeId) => {
+  console.log(exchangeId)
 }
 
 getOfferings()
   .then(submitRfq)
+  .then(getQuote)
+  .then(submitOrder)
   .then(() => console.log('Success!'))
