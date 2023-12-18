@@ -1,5 +1,6 @@
 package ftl.lib
 
+import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.core.JsonGenerator
 import com.fasterxml.jackson.core.JsonParser
 import com.fasterxml.jackson.core.type.TypeReference
@@ -26,10 +27,11 @@ class StringToTypeIdDeserializer : JsonDeserializer<TypeID>() {
 }
 
 object Json {
-    private val jsonMapper: ObjectMapper = ObjectMapper()
+    val jsonMapper: ObjectMapper = ObjectMapper()
         .registerKotlinModule()
         .findAndRegisterModules()
         .registerModule(TypeIdModule())
+        .setSerializationInclusion(JsonInclude.Include.NON_NULL)
         .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
 
     fun stringify(obj: Any): String {

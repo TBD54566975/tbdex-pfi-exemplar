@@ -13,71 +13,69 @@ import web5.sdk.credentials.model.PresentationDefinitionV2
 
 val REQUIRED_PAYMENT_DETAILS = Json.parse(
     """
-      {
-        "${'$'}schema": "http://json-schema.org/draft-07/schema",
-        "additionalProperties": false,
-        "type": "object",
-        "properties": {
-          "phoneNumber": {
-            "minLength": 12,
-            "pattern": "^+2547[0-9]{8}${'$'}",
-            "description": "Mobile Money account number of the Recipient",
-            "type": "string",
-            "title": "Phone Number",
-            "maxLength": 12
+        {
+          "${'$'}schema": "http://json-schema.org/draft-07/schema",
+          "additionalProperties": false,
+          "type": "object",
+          "properties": {
+            "phoneNumber": {
+              "minLength": 12,
+              "pattern": "^+2547[0-9]{8}${'$'}",
+              "description": "Mobile Money account number of the Recipient",
+              "type": "string",
+              "title": "Phone Number",
+              "maxLength": 12
+            },
+            "accountHolderName": {
+              "pattern": "^[A-Za-zs'-]+${'$'}",
+              "description": "Name of the account holder as it appears on the Mobile Money account",
+              "type": "string",
+              "title": "Account Holder Name",
+              "maxLength": 32
+            }
           },
-          "accountHolderName": {
-            "pattern": "^[A-Za-zs'-]+${'$'}",
-            "description": "Name of the account holder as it appears on the Mobile Money account",
-            "type": "string",
-            "title": "Account Holder Name",
-            "maxLength": 32
-          }
-        },
-        "required": [
-          "accountNumber",
-          "accountHolderName"
-        ]
-      }
+          "required": [
+            "accountNumber",
+            "accountHolderName"
+          ]
+        }
     """.trimIndent(),
     JsonNode::class.java)
 
 fun createOffering(uri: String): Offering {
     return Offering.create(
         from = uri,
-        data = OfferingData(
-            description = "fake offering 1",
-            payoutUnitsPerPayinUnit = "0.0069",
-            payoutCurrency = CurrencyDetails(currencyCode = "KES", minSubunits = "1", maxSubunits = "1000"),
-            payinCurrency = CurrencyDetails(currencyCode = "USD", minSubunits = "1", maxSubunits = "1000"),
+        OfferingData(
+            description = "A sample offering",
+            payoutUnitsPerPayinUnit = "1",
+            payinCurrency = CurrencyDetails("AUD", "1", "10000"),
+            payoutCurrency = CurrencyDetails("USDC"),
             payinMethods = listOf(
                 PaymentMethod(
-                    kind = "USD_LEDGER",
+                    kind = "BTC_ADDRESS",
                     requiredPaymentDetails = REQUIRED_PAYMENT_DETAILS
                 )
             ),
             payoutMethods = listOf(
                 PaymentMethod(
-                    kind = "MOMO_MPESA",
+                    kind = "MOMO",
                     requiredPaymentDetails = REQUIRED_PAYMENT_DETAILS
                 )
             ),
             requiredClaims = PresentationDefinitionV2(
-                id = "7ce4004c-3c38-4853-968b-e411bafcd945",
+                id = "test-pd-id",
+                name = "simple PD",
+                purpose = "pd for testing",
                 inputDescriptors = listOf(
                     InputDescriptorV2(
-                        id = "bbdb9b7c-5754-4f46-b63b-590bada959e0",
+                        id = "whatever",
+                        purpose = "for testing",
                         constraints = ConstraintsV2(
-                            fields = listOf(
-                                FieldV2(
-                                    path = listOf("$.type[*]")
-                                    // todo pattern = "^SanctionCredential$"
-                                )
-                            )
+                            fields = listOf(FieldV2(id = null, path = listOf("$.credentialSubject.btcAddress")))
                         )
                     )
                 )
-            )
+            ),
         )
     )
 }

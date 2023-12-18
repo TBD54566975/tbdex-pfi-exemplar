@@ -48,57 +48,42 @@ class Pfi {
 
         didKey = DidKey.load("did:key:z6MkjNMRmdDYN8ZK4GcLwokmcHy7edsUzea5uBaebZLVeYNM", keyManager)
 //        didKey = DidKey.create(keyManager, CreateDidKeyOptions(Algorithm("EdDSA"), Curve("Ed25519")))
-//        didKey = DidKey("did:key:zQ3shtpZRkkSSoAu461yCWoprySM19cXhqCMKaPu7yQ5AJrv7", keyManager)
     }
 
     @Verb
     @Ingress(Method.GET, "/offerings")
     fun getOfferings(context: Context, req: GetOfferingsRequest): GetOfferingsResponse {
-        try {
-            val exported = keyManager.export()
-            println(Json.stringify(exported))
-            println(didKey.uri)
+        val offerings: MutableList<Offering> = mutableListOf()
 
-            val offerings: MutableList<Offering> = mutableListOf()
+        val select = postgresClient.connection.createStatement()
+        val rs = select.executeQuery("SELECT * FROM offering")
 
-            val select = postgresClient.connection.createStatement()
-            val rs = select.executeQuery("SELECT * FROM offering")
+        if (!rs.next()) {
+            val offering = createOffering(didKey.uri)
+            offering.sign(didKey)
 
-            if (!rs.next()) {
-                println("KW DBG inserting!")
-                val offering = createOffering(didKey.uri)
-                offering.sign(didKey)
-
-                val test = Json.stringify(offering)
-                println(test)
-
-                val insert = postgresClient.connection.prepareStatement(
-                    "INSERT INTO offering (offeringid, payoutcurrency, payincurrency, offering) VALUES (?, ?, ?, ?::json)"
-                ).apply {
-                    setString(1, offering.metadata.id.toString())
-                    setString(2, offering.data.payinCurrency.currencyCode)
-                    setString(3, offering.data.payoutCurrency.currencyCode)
-                    setString(4, Json.stringify(offering))
-                }
-                insert.executeUpdate()
-                insert.close()
-
-                offerings.add(offering)
-            } else {
-                println("KW DBG selecting existing")
-                do {
-                    val offering = Offering.parse(rs.getString("offering"))
-                    offerings.add(offering)
-                } while (rs.next())
+            val insert = postgresClient.connection.prepareStatement(
+                "INSERT INTO offering (offeringid, payoutcurrency, payincurrency, offering) VALUES (?, ?, ?, ?::json)"
+            ).apply {
+                setString(1, offering.metadata.id.toString())
+                setString(2, offering.data.payinCurrency.currencyCode)
+                setString(3, offering.data.payoutCurrency.currencyCode)
+                setString(4, Json.stringify(offering))
             }
+            insert.executeUpdate()
+            insert.close()
 
-            postgresClient.close()
-
-            return GetOfferingsResponse(Json.stringify(offerings))
-        } catch (ex: Exception) {
-            println(ex)
-            throw ex
+            offerings.add(offering)
+        } else {
+            do {
+                val offering = Offering.parse(rs.getString("offering"))
+                offerings.add(offering)
+            } while (rs.next())
         }
+
+        postgresClient.close()
+
+        return GetOfferingsResponse(Json.stringify(offerings))
     }
 
     @Verb
@@ -106,46 +91,53 @@ class Pfi {
     fun submitRfq(context: Context, req: SubmitRfqRequest): SubmitRfqResponse {
         // todo middleware validation from tbdex-kt/httpserver
 
-        val rfq = Json.parse(req.rfq, Rfq::class.java)
-
         val sql = """
             INSERT INTO exchange (exchangeid, messageid, subject, messagekind, message)
             VALUES (?, ?, ?, ?, ?::json)
         """.trimIndent()
 
-        postgresClient.connection.prepareStatement(sql).apply {
-            setString(1, rfq.metadata.exchangeId.toString())
-            setString(2, rfq.metadata.id.toString())
-            setString(3, rfq.metadata.from)
-            setString(4, rfq.metadata.kind.toString())
-            setString(5, Json.stringify(rfq))
-        }.executeUpdate()
-
+        val rfq = Json.parse(req.rfq, Rfq::class.java)
+        rfq.sign(didKey)
+        val insertRfq = postgresClient.connection.prepareStatement(sql)
+            .apply {
+                setString(1, rfq.metadata.exchangeId.toString())
+                setString(2, rfq.metadata.id.toString())
+                setString(3, rfq.metadata.from)
+                setString(4, rfq.metadata.kind.toString())
+                setString(5, Json.stringify(rfq))
+            }
+        insertRfq.executeUpdate()
+        insertRfq.close()
         println("Inserted RFQ")
 
-        try {
-            val quote = Quote.create(
-                to = rfq.metadata.from,
-                from = didKey.uri,
-                exchangeId = rfq.metadata.exchangeId,
-                quoteData = QuoteData(
-                    expiresAt = OffsetDateTime.of(2023, 12, 1, 0, 0, 0, 0, ZoneOffset.UTC),
-                    payin = QuoteDetails(
-                        currencyCode = "USD",
-                        amountSubunits = "100"
-                    ),
-                    payout = QuoteDetails(
-                        currencyCode = "USD",
-                        amountSubunits = "100"
-                    )
+        val quote = Quote.create(
+            to = rfq.metadata.from,
+            from = didKey.uri,
+            exchangeId = rfq.metadata.exchangeId,
+            quoteData = QuoteData(
+                expiresAt = OffsetDateTime.of(2023, 12, 1, 0, 0, 0, 0, ZoneOffset.UTC),
+                payin = QuoteDetails(
+                    currencyCode = "USD",
+                    amountSubunits = "100"
+                ),
+                payout = QuoteDetails(
+                    currencyCode = "USD",
+                    amountSubunits = "100"
                 )
             )
-            quote.sign(didKey)
-
-            println(quote)
-        } catch (ex: Exception) {
-            println(ex)
-        }
+        )
+        quote.sign(didKey)
+        val insertQuote = postgresClient.connection.prepareStatement(sql)
+            .apply {
+                setString(1, quote.metadata.exchangeId.toString())
+                setString(2, quote.metadata.id.toString())
+                setString(3, quote.metadata.from)
+                setString(4, quote.metadata.kind.toString())
+                setString(5, Json.stringify(quote))
+            }
+        insertQuote.executeUpdate()
+        insertQuote.close()
+        println("Inserted Quote")
     }
 
     @Verb
