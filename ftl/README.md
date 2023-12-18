@@ -1,6 +1,12 @@
 # tbdex-pfi-exemplar/ftl
 
-## Setup
+## Prerequisites
+
+- Docker
+- [Hermit](https://cashapp.github.io/hermit/usage/get-started/)
+- NodeJS (for using `client/`)
+
+## Getting Started
 
 ### 1. Start Postgres & Run Migrations
 
@@ -8,15 +14,7 @@
 (cd ../db/scripts; ./start-pg; ./migrate)
 ```
 
-### 2. Seed database
-
-```shell
-(cd ../; npm i; npm run seed-offerings)
-```
-
-## Getting Started
-
-### 1. Activate [Hermit](https://cashapp.github.io/hermit/usage/get-started/)
+### 2. Activate [Hermit](https://cashapp.github.io/hermit/usage/get-started/)
 
 > [!NOTE]
 >
@@ -26,7 +24,7 @@
 source ./bin/activate-hermit
 ```
 
-### 2. Start your FTL cluster 
+### 3. Start your FTL cluster 
 
 > [!NOTE]
 >
@@ -36,7 +34,7 @@ source ./bin/activate-hermit
 ftl serve 
 ```
 
-### 3. In a new shell, start the development server
+### 4. In a new shell, start the development server
 
 > [!NOTE]
 >
@@ -50,4 +48,12 @@ ftl serve
 ftl dev .
 ```
 
-### 4. Go to http://localhost:8892/ in your web browser
+### 5. Go to http://localhost:8892/ in your web browser
+
+![img.png](assets/console.png)
+
+### 6. Run a full client integration
+
+```shell
+(cd client/; npm install; npm run integration;)
+```
