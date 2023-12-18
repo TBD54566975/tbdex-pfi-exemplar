@@ -29,11 +29,8 @@ class Pfi {
     private val postgresClient = PostgresClient()
     private val didKey: DidKey
 
-    private var keyManager: InMemoryKeyManager
-
     init {
-        keyManager = InMemoryKeyManager()
-//        keyManager.generatePrivateKey(Algorithm("EdDSA"), Curve("Ed25519"))
+        val keyManager = InMemoryKeyManager()
         keyManager.import(JWK.parse("""
             {
               "kty": "OKP",
@@ -47,7 +44,25 @@ class Pfi {
         """.trimIndent()))
 
         didKey = DidKey.load("did:key:z6MkjNMRmdDYN8ZK4GcLwokmcHy7edsUzea5uBaebZLVeYNM", keyManager)
-//        didKey = DidKey.create(keyManager, CreateDidKeyOptions(Algorithm("EdDSA"), Curve("Ed25519")))
+    }
+
+    private fun signAndInsertExchange(message: Message) {
+        val sql = """
+            INSERT INTO exchange (exchangeid, messageid, subject, messagekind, message)
+            VALUES (?, ?, ?, ?, ?::json)
+        """.trimIndent()
+
+        message.sign(didKey)
+        val statement = postgresClient.connection.prepareStatement(sql)
+            .apply {
+                setString(1, message.metadata.exchangeId.toString())
+                setString(2, message.metadata.id.toString())
+                setString(3, message.metadata.from)
+                setString(4, message.metadata.kind.toString())
+                setString(5, Json.stringify(message))
+            }
+        statement.executeUpdate()
+        statement.close()
     }
 
     @Verb
@@ -91,24 +106,8 @@ class Pfi {
     fun submitRfq(context: Context, req: SubmitRfqRequest): SubmitRfqResponse {
         // todo middleware validation from tbdex-kt/httpserver
 
-        val sql = """
-            INSERT INTO exchange (exchangeid, messageid, subject, messagekind, message)
-            VALUES (?, ?, ?, ?, ?::json)
-        """.trimIndent()
-
         val rfq = Json.parse(req.rfq, Rfq::class.java)
-        rfq.sign(didKey)
-        val insertRfq = postgresClient.connection.prepareStatement(sql)
-            .apply {
-                setString(1, rfq.metadata.exchangeId.toString())
-                setString(2, rfq.metadata.id.toString())
-                setString(3, rfq.metadata.from)
-                setString(4, rfq.metadata.kind.toString())
-                setString(5, Json.stringify(rfq))
-            }
-        insertRfq.executeUpdate()
-        insertRfq.close()
-        println("Inserted RFQ")
+        signAndInsertExchange(rfq)
 
         val quote = Quote.create(
             to = rfq.metadata.from,
@@ -126,18 +125,7 @@ class Pfi {
                 )
             )
         )
-        quote.sign(didKey)
-        val insertQuote = postgresClient.connection.prepareStatement(sql)
-            .apply {
-                setString(1, quote.metadata.exchangeId.toString())
-                setString(2, quote.metadata.id.toString())
-                setString(3, quote.metadata.from)
-                setString(4, quote.metadata.kind.toString())
-                setString(5, Json.stringify(quote))
-            }
-        insertQuote.executeUpdate()
-        insertQuote.close()
-        println("Inserted Quote")
+        signAndInsertExchange(quote)
     }
 
     @Verb
