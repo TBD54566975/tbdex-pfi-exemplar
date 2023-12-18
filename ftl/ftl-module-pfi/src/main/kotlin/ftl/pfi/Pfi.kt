@@ -1,7 +1,6 @@
 package ftl.pfi
 
 import com.nimbusds.jose.jwk.JWK
-import de.fxlae.typeid.TypeId
 import ftl.lib.Json
 import ftl.lib.PostgresClient
 import tbdex.sdk.protocol.models.*
@@ -31,7 +30,7 @@ class Pfi {
 
     init {
         val keyManager = InMemoryKeyManager()
-        // todo obv this shouldn't be in git XD
+        // todo obv this shouldn't be in git
         keyManager.import(JWK.parse("""
             {
               "kty": "OKP",
@@ -110,7 +109,6 @@ class Pfi {
 
         val quote = Quote.create(
             rfq.metadata.from, didKey.uri, rfq.metadata.exchangeId,
-            //TypeId.generate(MessageKind.rfq.name),
             QuoteData(
                 expiresAt = OffsetDateTime.now().plusDays(1),
                 payin = QuoteDetails("AUD", "1000", "1"),
