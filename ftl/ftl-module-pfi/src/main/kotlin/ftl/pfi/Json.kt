@@ -1,4 +1,4 @@
-package ftl.lib
+package ftl.pfi
 
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.core.JsonGenerator

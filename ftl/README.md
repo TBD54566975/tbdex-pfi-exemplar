@@ -55,5 +55,5 @@ ftl dev .
 ### 6. Run a full client integration
 
 ```shell
-(cd client/; npm install; npm run integration;)
+(cd integration-sample/; npm install; npm run integration;)
 ```

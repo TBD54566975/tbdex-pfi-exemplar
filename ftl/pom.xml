@@ -9,7 +9,6 @@
     <packaging>pom</packaging>
 
     <modules>
-        <module>lib</module>
         <module>ftl-module-pfi</module>
     </modules>
 
@@ -22,6 +21,17 @@
         <maven.compiler.target>${java.version}</maven.compiler.target>
     </properties>
 
+    <repositories>
+        <repository>
+            <id>jitpack.io</id>
+            <url>https://jitpack.io</url>
+        </repository>
+        <repository>
+            <id>danubetech</id>
+            <url>https://repo.danubetech.com/repository/maven-public/</url>
+        </repository>
+    </repositories>
+
     <dependencies>
         <dependency>
             <groupId>org.jetbrains.kotlin</groupId>
@@ -33,10 +43,47 @@
             <artifactId>ftl-runtime</artifactId>
             <version>${ftl.version}</version>
         </dependency>
+
+<!--        [KW] developer-added-->
+        <!--        <dependency>-->
+        <!--            <groupId>com.github.TBD54566975.tbdex-kt</groupId>-->
+        <!--            <artifactId>protocol</artifactId>-->
+        <!--            <version>0.6.0-beta</version>-->
+        <!--        </dependency>-->
+        <!--        <dependency>-->
+        <!--            <groupId>com.github.TBD54566975.tbdex-kt</groupId>-->
+        <!--            <artifactId>httpclient</artifactId>-->
+        <!--            <version>0.6.0-beta</version>-->
+        <!--        </dependency>-->
         <dependency>
-            <groupId>ftl</groupId>
-            <artifactId>lib</artifactId>
-            <version>1.0-SNAPSHOT</version>
+            <groupId>tbdex</groupId>
+            <artifactId>protocol</artifactId>
+            <version>0.6.0</version>
+        </dependency>
+        <dependency>
+            <groupId>tbdex</groupId>
+            <artifactId>httpclient</artifactId>
+            <version>0.6.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>2.15.3</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.module</groupId>
+            <artifactId>jackson-module-kotlin</artifactId>
+            <version>2.15.3</version>
+        </dependency>
+        <dependency>
+            <groupId>me.lessis</groupId>
+            <artifactId>typeid</artifactId>
+            <version>0.0.2</version>
+        </dependency>
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <version>42.7.1</version>
         </dependency>
     </dependencies>
 
