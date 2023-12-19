@@ -1,6 +1,5 @@
 package ftl.pfi.data
 
-import ftl.pfi.Json
 import ftl.pfi.clients.PostgresClient
 import tbdex.sdk.protocol.models.Offering
 
@@ -33,7 +32,7 @@ class OfferingsRepository {
             setString(1, offering.metadata.id.toString())
             setString(2, offering.data.payinCurrency.currencyCode)
             setString(3, offering.data.payoutCurrency.currencyCode)
-            setString(4, Json.stringify(offering))
+            setString(4, offering.toString())
         }
         statement.executeUpdate()
         statement.close()

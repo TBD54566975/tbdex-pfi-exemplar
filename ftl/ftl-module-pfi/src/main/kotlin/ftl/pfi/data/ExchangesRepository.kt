@@ -1,6 +1,5 @@
 package ftl.pfi.data
 
-import ftl.pfi.Json
 import ftl.pfi.clients.PostgresClient
 import tbdex.sdk.protocol.models.Message
 
@@ -19,7 +18,7 @@ class ExchangesRepository {
                 setString(2, message.metadata.id.toString())
                 setString(3, message.metadata.from)
                 setString(4, message.metadata.kind.toString())
-                setString(5, Json.stringify(message))
+                setString(5, message.toString())
             }
         statement.executeUpdate()
         statement.close()
