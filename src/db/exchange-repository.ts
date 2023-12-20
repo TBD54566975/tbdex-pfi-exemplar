@@ -5,6 +5,7 @@ import { Postgres } from './postgres.js'
 import { config } from '../config.js'
 
 class _ExchangeRepository implements ExchangesApi {
+
   async getExchanges(opts: { filter: GetExchangesFilter }): Promise<MessageKindClass[][]> {
     // TODO: try out GROUP BY! would do it now, just unsure what the return structure looks like
     const exchangeIds = opts.filter.id?.length ? opts.filter.id : []
@@ -101,7 +102,7 @@ class _ExchangeRepository implements ExchangesApi {
   }
 
   async getClose(opts: { exchangeId: string }): Promise<Close> {
-    return await this.getMessage({ exchangeId: opts.exchangeId, messageKind: 'order' }) as Close
+    return await this.getMessage({ exchangeId: opts.exchangeId, messageKind: 'close' }) as Close
   }
 
   async getMessage(opts: { exchangeId: string, messageKind: MessageKind }) {
@@ -136,8 +137,7 @@ class _ExchangeRepository implements ExchangesApi {
     console.log(`Add ${message.kind} Result: ${JSON.stringify(result, null, 2)}`)
 
     if (message.kind == 'rfq') {
-      const quote = Quote.create(
-        {
+      const quote = Quote.create({
           metadata: {
             from: config.did.id,
             to: message.from,
@@ -161,8 +161,23 @@ class _ExchangeRepository implements ExchangesApi {
     }
 
     if (message.kind == 'order') {
-      const orderStatus = OrderStatus.create(
-        {
+      let orderStatus = OrderStatus.create({
+          metadata: {
+            from: config.did.id,
+            to: message.from,
+            exchangeId: message.exchangeId
+          },
+          data: {
+            orderStatus: 'PROCESSING'
+          }
+        }
+      )
+      await orderStatus.sign(config.did.privateKey, config.did.kid)
+      this.addMessage({ message: orderStatus as OrderStatus})
+
+      await new Promise(resolve => setTimeout(resolve, 1000)); // 1 second delay
+
+      orderStatus = OrderStatus.create({
           metadata: {
             from: config.did.id,
             to: message.from,
@@ -175,7 +190,21 @@ class _ExchangeRepository implements ExchangesApi {
       )
       await orderStatus.sign(config.did.privateKey, config.did.kid)
       this.addMessage({ message: orderStatus as OrderStatus})
-    }
+
+      // finally close the exchange
+      const close = Close.create({
+        metadata: {
+          from: config.did.id,
+          to: message.from,
+          exchangeId: message.exchangeId
+        },
+        data: {
+          reason: 'Order fulfilled'
+        }
+      });
+      await close.sign(config.did.privateKey, config.did.kid)
+      this.addMessage({ message: close as Close })
+    } 
   }
 }
 

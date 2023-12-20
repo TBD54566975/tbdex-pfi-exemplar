@@ -1,4 +1,4 @@
-import { TbdexHttpClient, Rfq, Quote, Order, OrderStatus } from '@tbdex/http-client'
+import { TbdexHttpClient, Rfq, Quote, Order, OrderStatus, Close } from '@tbdex/http-client'
 import { createOrLoadDid } from './utils.js'
 
 //
@@ -98,9 +98,9 @@ for (const message of exchange) {
     const orderResponse = await TbdexHttpClient.sendMessage({ message: order })
     console.log('orderResponse', orderResponse)
 
-    // finally we poll for response.
-    const finalState = await pollForStatus(order, pfiDid, privateKeyJwk, kid)
-    console.log('Final status:', finalState)
+    // poll for order status updates
+    const orderStatus = await pollForStatus(order, pfiDid, privateKeyJwk, kid)
+    console.log('orderStatus', JSON.stringify(orderStatus, null, 2));
   }
 }
 
@@ -108,8 +108,8 @@ for (const message of exchange) {
  * This is a very simple polling function that will poll for the status of an order.
  */
 async function pollForStatus(order, pfiDid, privateKeyJwk, kid) {
-  const always = true
-  while (always) {
+    let close;
+    while (!close) {
     const exchanges = await TbdexHttpClient.getExchanges({
       pfiDid: pfiDid,
       filter: { id: order.exchangeId },
@@ -124,7 +124,12 @@ async function pollForStatus(order, pfiDid, privateKeyJwk, kid) {
         console.log('we have an order status')
         const orderStatus = message as OrderStatus
         console.log('orderStatus', orderStatus)
-        return orderStatus
+      }
+      else if(message instanceof Close) {
+        console.log('we have a close message')
+        close = message as Close
+        console.log('close', close)
+        return close
       }
     }
   }
