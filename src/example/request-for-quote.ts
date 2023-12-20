@@ -130,6 +130,7 @@ async function pollForStatus(order, pfiDid, privateKeyJwk, kid) {
         close = message as Close
         console.log('close', close)
         return close
+      }
     }
   }
 }
