@@ -138,73 +138,70 @@ class _ExchangeRepository implements ExchangesApi {
 
     if (message.kind == 'rfq') {
       const quote = Quote.create({
-          metadata: {
-            from: config.did.id,
-            to: message.from,
-            exchangeId: message.exchangeId
+        metadata: {
+          from: config.did.did,
+          to: message.from,
+          exchangeId: message.exchangeId
+        },
+        data: {
+          expiresAt: new Date(2024, 4, 1).toISOString(),
+          payin: {
+            currencyCode: 'BTC',
+            amount: '1000.00'
           },
-          data: {
-            expiresAt: new Date(2024, 4, 1).toISOString(),
-            payin: {
-              currencyCode: 'BTC',
-              amountSubunits: '1000'
-            },
-            payout: {
-              currencyCode: 'KES',
-              amountSubunits: '123456789'
-            }
+          payout: {
+            currencyCode: 'KES',
+            amount: '123456789.00'
           }
         }
-      )
-      await quote.sign(config.did.privateKey, config.did.kid)
+      })
+      await quote.sign(config.did)
       this.addMessage({ message: quote as Quote})
     }
 
     if (message.kind == 'order') {
       let orderStatus = OrderStatus.create({
-          metadata: {
-            from: config.did.id,
-            to: message.from,
-            exchangeId: message.exchangeId
-          },
-          data: {
-            orderStatus: 'PROCESSING'
-          }
+        metadata: {
+          from: config.did.did,
+          to: message.from,
+          exchangeId: message.exchangeId
+        },
+        data: {
+          orderStatus: 'PROCESSING'
         }
-      )
-      await orderStatus.sign(config.did.privateKey, config.did.kid)
+      })
+      await orderStatus.sign(config.did)
       this.addMessage({ message: orderStatus as OrderStatus})
 
-      await new Promise(resolve => setTimeout(resolve, 1000)); // 1 second delay
+      await new Promise(resolve => setTimeout(resolve, 1000)) // 1 second delay
 
       orderStatus = OrderStatus.create({
-          metadata: {
-            from: config.did.id,
-            to: message.from,
-            exchangeId: message.exchangeId
-          },
-          data: {
-            orderStatus: 'COMPLETED'
-          }
+        metadata: {
+          from: config.did.did,
+          to: message.from,
+          exchangeId: message.exchangeId
+        },
+        data: {
+          orderStatus: 'COMPLETED'
         }
-      )
-      await orderStatus.sign(config.did.privateKey, config.did.kid)
+      })
+      await orderStatus.sign(config.did)
       this.addMessage({ message: orderStatus as OrderStatus})
 
       // finally close the exchange
       const close = Close.create({
         metadata: {
-          from: config.did.id,
+          from: config.did.did,
           to: message.from,
           exchangeId: message.exchangeId
         },
         data: {
           reason: 'Order fulfilled'
         }
-      });
-      await close.sign(config.did.privateKey, config.did.kid)
+      })
+      await close.sign(config.did)
       this.addMessage({ message: close as Close })
-    } 
+    }
   }
 }
 
