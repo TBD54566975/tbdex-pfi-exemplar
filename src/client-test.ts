@@ -59,17 +59,13 @@ const rfq = Rfq.create({
     payinAmount: '100.00',
     payinMethod: {
       kind: 'USD_LEDGER',
-      paymentDetails: {
-        cvv: '123',
-        cardNumber: '1234567890123456789',
-        expiryDate: '10/23',
-        cardHolderName: 'Ephraim Mcgilacutti'
-      }
+      paymentDetails: {}
     },
     payoutMethod: {
-      kind: 'BTC_ADDRESS',
+      kind: 'BANK_FIRSTBANK',
       paymentDetails: {
-        btcAddress: '0x1234567890'
+        accountNumber: '0x1234567890',
+        reason: 'I got kids'
       }
     },
     claims: [signedCredential]
