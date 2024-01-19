@@ -8,6 +8,10 @@
     {
       "name": "Install dbmate",
       "command": "curl -fsSL -o /usr/local/bin/dbmate https://github.com/amacneil/dbmate/releases/latest/download/dbmate-linux-amd64 && chmod +x /usr/local/bin/dbmate"
+    },
+    {
+      "name": "prepare scripts",
+      "command": "chmod +x ./db/scripts/*"
     }
   ]
 }
