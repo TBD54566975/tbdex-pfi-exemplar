@@ -6,7 +6,17 @@ Mock Typescript PFI implementation for example purposes using:
 * [@tbdex/http-server](https://www.npmjs.com/package/@tbdex/http-server)
 * Postgres as underlying DB
 
-# Development Prerequisites
+# Running in codesandbox
+
+You can run this example in codesandbox, or locally. 
+
+To run in codesandbox, use this link and then continue on from the preparing server section below. 
+
+<a href="https://githubbox.com/TBD54566975/tbdex-pfi-exemplar">Open sandbox</a>
+
+# Local Development Prerequisites
+
+
 ## `node` and `npm`
 This project is using `node v20.3.1` and `npm >=v7.0.0`. You can verify your `node` and `npm` installation via the terminal:
 
