@@ -12,7 +12,7 @@ You can run this example in codesandbox, or locally.
 
 To run in codesandbox, use this link and then continue on from the preparing server section below. 
 
-<a href="https://githubbox.com/michaelneale/tbdex-pfi-exemplar">Open sandbox</a>
+<a href="https://githubbox.com/TBD54566975/tbdex-pfi-exemplar">Open sandbox</a>
 
 # Local Development Prerequisites
 
