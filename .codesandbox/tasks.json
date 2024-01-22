@@ -13,5 +13,13 @@
       "name": "prepare scripts",
       "command": "chmod +x ./db/scripts/*"
     }
+  ],
+
+  "tasks" : [ 
+    {
+    "name": "Install",
+    "command": "npm install"
+    }
   ]
+
 }
