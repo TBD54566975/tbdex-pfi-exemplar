@@ -15,11 +15,13 @@
     }
   ],
 
-  "tasks" : [ 
-    {
-    "name": "Install",
-    "command": "npm install"
+  "tasks" :  {
+    "install": {
+      "name": "Install deps",    
+      "command": "npm install"
     }
-  ]
+  }
+
+  
 
 }
