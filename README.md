@@ -8,9 +8,10 @@ Mock Typescript PFI implementation for example purposes using:
 
 # Running in codesandbox
 
-You can run this example in codesandbox, or locally. 
+You can run try this example in codesandbox, or locally. 
 
-To run in codesandbox, use this link and then continue on from the preparing server section below. 
+To run in codesandbox, use the link below and then open a terminal.
+Then continue on from the preparing server section below. 
 
 <a href="https://githubbox.com/TBD54566975/tbdex-pfi-exemplar">Open sandbox</a>
 
