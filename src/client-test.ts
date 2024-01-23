@@ -15,8 +15,7 @@ let PFI_DID = await fs.readFile('server-did.txt', 'utf-8')
 //
 //  Connect to the PFI and get the list of offerings (offerings are resources - anyone can ask for them)
 //
-const { data } = await TbdexHttpClient.getOfferings({ pfiDid: PFI_DID })
-const [ offering ] = data
+const [ offering ] = await TbdexHttpClient.getOfferings({ pfiDid: PFI_DID })
 //console.log('offering', JSON.stringify(offering, null, 2))
 
 
@@ -36,10 +35,6 @@ console.log('issuer did:', issuer.did)
 //
 // Create a did for Alice, who is the customer of the PFI in this case.
 const alice = await createOrLoadDid('alice.json')
-
-
-const { privateKeyJwk } = alice.keySet.verificationMethodKeys[0]
-const kid = alice.document.verificationMethod[0].id
 
 //
 //
@@ -61,27 +56,23 @@ const rfq = Rfq.create({
   metadata: { from: alice.did, to: PFI_DID },
   data: {
     offeringId: offering.id,
-    payinSubunits: '100',
+    payinAmount: '100.00',
     payinMethod: {
-      kind: 'DEBIT_CARD',
-      paymentDetails: {
-        cvv: '123',
-        cardNumber: '1234567890123456789',
-        expiryDate: '10/23',
-        cardHolderName: 'Ephraim Mcgilacutti'
-      }
+      kind: 'USD_LEDGER',
+      paymentDetails: {}
     },
     payoutMethod: {
-      kind: 'BTC_ADDRESS',
+      kind: 'BANK_FIRSTBANK',
       paymentDetails: {
-        btcAddress: '0x1234567890'
+        accountNumber: '0x1234567890',
+        reason: 'I got kids'
       }
     },
     claims: [signedCredential]
   }
 })
 
-await rfq.sign(privateKeyJwk, kid)
+await rfq.sign(alice)
 
 const rasp = await TbdexHttpClient.sendMessage({ message: rfq })
 console.log('send rfq response', JSON.stringify(rasp, null, 2))
@@ -92,9 +83,8 @@ console.log('send rfq response', JSON.stringify(rasp, null, 2))
 // This is where for example a quote would show up in result to an RFQ.
 const exchanges = await TbdexHttpClient.getExchanges({
   pfiDid: PFI_DID,
-  filter: { id: rfq.exchangeId },
-  privateKeyJwk,
-  kid
+  did: alice,
+  filter: { id: rfq.exchangeId }
 })
 
 console.log('exchanges', JSON.stringify(exchanges, null, 2))

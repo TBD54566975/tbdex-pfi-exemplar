@@ -9,7 +9,7 @@ await Postgres.connect()
 await Postgres.clear()
 
 const offering = Offering.create({
-  metadata: { from: config.did.id },
+  metadata: { from: config.did.did },
   data: {
     description: 'fake offering 1',
     payoutUnitsPerPayinUnit: '0.0069', // ex. we send 100 dollars, so that means 14550.00 KES
@@ -100,5 +100,5 @@ const offering = Offering.create({
   }
 })
 
-await offering.sign(config.did.privateKey, config.did.kid)
+await offering.sign(config.did)
 await OfferingRepository.create(offering)

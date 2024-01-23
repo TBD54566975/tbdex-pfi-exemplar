@@ -5,8 +5,7 @@ import fs from 'node:fs'
 
 import 'dotenv/config'
 
-import { DidIonMethod } from '@web5/dids'
-import { PrivateKeyJwk } from '@web5/crypto'
+import { DidIonMethod, PortableDid } from '@web5/dids'
 
 export type Environment = 'local' | 'staging' | 'production'
 
@@ -16,11 +15,7 @@ export type Config = {
   host: string;
   port: number;
   db: PoolConfig
-  did: {
-    id: string
-    privateKey: PrivateKeyJwk
-    kid: string
-  }
+  did: PortableDid
   allowlist: string[]
 }
 
@@ -36,25 +31,19 @@ export const config: Config = {
     password : process.env['SEC_DB_PASSWORD'] || 'tbd',
     database : process.env['SEC_DB_NAME'] || 'mockpfi'
   },
-  did: {
-    id   : process.env['SEC_DID'],
-    privateKey : JSON.parse(process.env['SEC_DID_PRIVATE_KEY'] || null),
-    kid   : process.env['SEC_DID_KID']
-  },
+  did: undefined,
   allowlist: JSON.parse(process.env['SEC_ALLOWLISTED_DIDS'] || '[]')
 }
 
 // create ephemeral PFI did if one wasn't provided. Note: this DID and associated keys aren't persisted!
 // a new one will be generated every time the process starts.
-if (!config.did.id) {
+if (!config.did) {
   console.log('Creating an ephemeral DID.....')
   const DidIon = await DidIonMethod.create({
     services: [{ id: 'pfi', type: 'PFI', serviceEndpoint: config.host }]
   })
 
 
-  config.did.id = DidIon.did
-  fs.writeFileSync('server-did.txt', config.did.id)
-  config.did.privateKey = DidIon.keySet.verificationMethodKeys[0].privateKeyJwk
-  config.did.kid = `${config.did.id}#${config.did.privateKey.kid}`
+  config.did = DidIon
+  fs.writeFileSync('server-did.txt', config.did.did)
 }
