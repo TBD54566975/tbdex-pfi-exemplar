@@ -45,6 +45,8 @@
     "typescript": "5.2.2"
   },
   "scripts": {
+    "_debug": "npm run _start -- --enable-source-maps",
+    "_start": "npm run clean && npm run compile && node",
     "clean": "rimraf dist",
     "compile": "tsc",
     "lint": "eslint . --ext .ts --max-warnings 0",
