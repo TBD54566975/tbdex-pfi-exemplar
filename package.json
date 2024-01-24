@@ -49,15 +49,15 @@
     "_start": "npm run clean && npm run compile && node",
     "clean": "rimraf dist",
     "compile": "tsc",
+    "example-create-customer": "npm run _debug -- dist/example/create-customer.js",
+    "example-create-issuer": "npm run _debug -- dist/example/create-issuer.js",
+    "example-issue-credential": "npm run _debug -- dist/example/issue-credential.js",
+    "example-rfq": "npm run _debug -- dist/example/request-for-quote.js",
     "lint": "eslint . --ext .ts --max-warnings 0",
     "lint:fix": "eslint . --ext .ts --fix",
-    "server": "npm run clean && npm run compile && node --enable-source-maps dist/main.js",
+    "seed-offerings": "npm run _start -- dist/seed-offerings.js",
+    "server": "npm run _start -- dist/main.js",
     "test": "rimraf dist/tests && npm run compile && node --test",
-    "seed-offerings": "npm run clean && npm run compile && node dist/seed-offerings.js",
-    "try": "npm run clean && npm run compile && node --enable-source-maps dist/client-test.js",
-    "example-create-issuer": "npm run clean && npm run compile && node --enable-source-maps dist/example/create-issuer.js",
-    "example-create-customer": "npm run clean && npm run compile && node --enable-source-maps dist/example/create-customer.js",
-    "example-issue-credential": "npm run clean && npm run compile && node --enable-source-maps dist/example/issue-credential.js",
-    "example-rfq": "npm run clean && npm run compile && node --enable-source-maps dist/example/request-for-quote.js"
+    "try": "npm run _debug -- dist/client-test.js"
   }
 }
