@@ -20,3 +20,25 @@ export DATABASE_URL="postgres://$DP_SEC_DB_USER:$DP_SEC_DB_PASSWORD@$DP_SEC_DB_H
 RED="$(tput bold && tput setaf 1)"
 YELLOW="$(tput bold && tput setaf 3)"
 RESET="$(tput sgr0)"
+
+_logger() {
+	local color="$1"
+	local level="$2"
+	shift 2
+
+	local message="$*"
+	local current_datetime="$(date +'%F %T')"
+	printf "%s%s%10s%s%s\n" "$color" "$current_datetime" "$level - " "$message" "$RESET"
+}
+
+error() {
+	_logger "$RED" "ERROR" "$*"
+}
+
+warn() {
+	_logger "$YELLOW" "WARN" "$*"
+}
+
+info() {
+	_logger "$RESET" "INFO" "$*"
+}
