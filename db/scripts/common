@@ -17,5 +17,6 @@ export DATABASE_URL=postgres://$DP_SEC_DB_USER:$DP_SEC_DB_PASSWORD@$DP_SEC_DB_HO
 export DBMATE_MIGRATIONS_DIR=$THIS_DIR/../migrations
 
 # colors that can be used in bash scripts when echoing
-YELLOW='\033[33m'
-RESET='\033[0m'
+RED="$(tput bold && tput setaf 1)"
+YELLOW="$(tput bold && tput setaf 3)"
+RESET="$(tput sgr0)"
