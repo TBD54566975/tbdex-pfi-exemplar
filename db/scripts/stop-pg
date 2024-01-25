@@ -4,8 +4,8 @@
 # container as well
 
 THIS_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &>/dev/null && pwd)
-source $THIS_DIR/common
-source $THIS_DIR/local
+source "$THIS_DIR/common"
+source "$THIS_DIR/local"
 
 if [ -z "$STOPPED_CONTAINER" ]; then
 	echo "stopping $CONTAINER_NAME"

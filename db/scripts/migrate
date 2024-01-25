@@ -1,7 +1,6 @@
 #!/bin/bash
 
 # This script runs db migrations. environment variables can be found in `common`
-
 THIS_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &>/dev/null && pwd)
 source "$THIS_DIR/common"
 
