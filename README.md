@@ -63,7 +63,8 @@ instructions](https://github.com/amacneil/dbmate?tab=readme-ov-file#installation
 based on your OS' package manager.
 
 ## Preparing the server database (one time)
-> 💡 Make sure you have all the [prerequisites](#development-prerequisites)
+> [!IMPORTANT]
+> Make sure you have all the [prerequisites](#development-prerequisites)
 
 1. Clone the repo and `cd` into the project directory
 2. `/db/scripts/start-pg` from your command line to start a `psql` container by
@@ -93,7 +94,8 @@ npm run example-create-issuer
 
 Creates a new VC issuer, which will be needed by the PFI.
 
->💡 Note: `issuer.json` stores the private info for the issuer
+> [!NOTE]
+>`issuer.json` stores the private info for the issuer
 
 ### Step 3: Configure the PFI database with offerings and VC issuer
 Replace [these lines
@@ -114,7 +116,8 @@ npm run example-create-customer
 Create a new "customer" DID (customer is called Alice, think of it as her
 wallet). **Take note of her DID which will be used in the next step**.
 
->💡 Alice's private wallet info is stored in `alice.json`.
+> [!NOTE]
+> Alice's private wallet info is stored in `alice.json`.
 
 ### Step 5: Issue a sanctions check VC to "Alice"
 Issue the credential to Alice, which ensures Alice is a non-sanctioned
@@ -132,8 +135,9 @@ Run the server (or restart it) in another terminal window:
 npm run server
 ```
 
->💡 The server prints out the DID for the server after it starts, take a copy
->of this for the next step.
+> [!NOTE]
+> The server prints out the DID for the server after it starts, take a copy
+> of this for the next step.
 
 ### Step 7: Run a tbDEX exchange
 Run a tbDEX transaction (or exchange):
@@ -213,13 +217,15 @@ line:
 
 This will generate a barebones migration template file for you.
 
->💡 The above example assumes you're in the root directory of the project.
->adjust the path to the script if you're not in the root.
+> [!NOTE]
+> The above example assumes you're in the root directory of the project.
+> adjust the path to the script if you're not in the root.
 
->💡 for `replace_with_file_name`, our convention is `<action>_<tblname>_table`
->(e.g. if you're wanting to create a migration file to create a `quotes` table
->it would be `create_quotes_table.sql` as the filename. `dbmate` prefixes these
->with a timestamp so they can be applied linearly.
+> [!TIP]
+> for `replace_with_file_name`, our convention is `<action>_<tblname>_table`
+> (e.g. if you're wanting to create a migration file to create a `quotes` table
+> it would be `create_quotes_table.sql` as the filename. `dbmate` prefixes these
+> with a timestamp so they can be applied linearly.
 
 #### Running migrations
 Migrations can be applied by running `./db/scripts/migrate` from the command
