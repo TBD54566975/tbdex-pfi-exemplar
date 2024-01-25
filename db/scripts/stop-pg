@@ -1,4 +1,4 @@
-#! /bin/bash
+#!/usr/bin/env bash
 
 # This script stops dockerized mysql if it isn't already running. passing -rm will delete the
 # container as well
