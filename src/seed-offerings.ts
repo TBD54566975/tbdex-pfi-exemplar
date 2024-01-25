@@ -84,7 +84,7 @@ const offering = Offering.create({
                 pattern: '^SanctionCredential$'
               }
             }
-            // uncommend the following with a valid issuer did from npm run example-create-issuer:
+            // uncomment the following with a valid issuer did from npm run example-create-issuer:
             //,
             //{
             //  path: ['$.issuer'],
