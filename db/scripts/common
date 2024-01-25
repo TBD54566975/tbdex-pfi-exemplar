@@ -13,8 +13,8 @@ THIS_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &>/dev/null && pwd)
 : "${DP_SEC_DB_NAME:="mockpfi"}"
 
 # these are exported because they're used by child processes (e.g. dbmate)
-export DATABASE_URL=postgres://$DP_SEC_DB_USER:$DP_SEC_DB_PASSWORD@$DP_SEC_DB_HOST:$DP_SEC_DB_PORT/$DP_SEC_DB_NAME?sslmode=disable
 export DBMATE_MIGRATIONS_DIR=$THIS_DIR/../migrations
+export DATABASE_URL="postgres://$DP_SEC_DB_USER:$DP_SEC_DB_PASSWORD@$DP_SEC_DB_HOST:$DP_SEC_DB_PORT/$DP_SEC_DB_NAME?sslmode=disable"
 
 # colors that can be used in bash scripts when echoing
 RED="$(tput bold && tput setaf 1)"
