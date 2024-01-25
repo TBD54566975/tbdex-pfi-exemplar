@@ -2,8 +2,8 @@
 
 # This script runs db migrations. environment variables can be found in `common`
 
-THIS_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
-source $THIS_DIR/common
+THIS_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &>/dev/null && pwd)
+source "$THIS_DIR/common"
 
 if [ -d "$DBMATE_MIGRATIONS_DIR" ] && [ -n "($ls -A $DBMATE_MIGRATIONS_DIR)" ]; then
 	echo "$(date '+%Y-%m-%d %H:%M:%S')  Running migrations for postgres://$DP_SEC_DB_USER:****@$DP_SEC_DB_HOST:$DP_SEC_DB_PORT/$DP_SEC_DB_NAME?sslmode=disable"
