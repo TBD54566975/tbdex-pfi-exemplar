@@ -6,11 +6,11 @@
 THIS_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &>/dev/null && pwd)
 
 # variables with defaults. these are overridden by our deployment infra in staging and prod
-: ${DP_SEC_DB_USER:="postgres"}
-: ${DP_SEC_DB_PASSWORD:="tbd"}
-: ${DP_SEC_DB_HOST:="localhost"}
-: ${DP_SEC_DB_PORT:="5432"}
-: ${DP_SEC_DB_NAME:="mockpfi"}
+: "${DP_SEC_DB_USER:="postgres"}"
+: "${DP_SEC_DB_PASSWORD:="tbd"}"
+: "${DP_SEC_DB_HOST:="localhost"}"
+: "${DP_SEC_DB_PORT:="5432"}"
+: "${DP_SEC_DB_NAME:="mockpfi"}"
 
 # these are exported because they're used by child processes (e.g. dbmate)
 export DATABASE_URL=postgres://$DP_SEC_DB_USER:$DP_SEC_DB_PASSWORD@$DP_SEC_DB_HOST:$DP_SEC_DB_PORT/$DP_SEC_DB_NAME?sslmode=disable
