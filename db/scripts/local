@@ -1,7 +1,19 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # This script contains variables used in scripts that are for running locally
 
+get_container() {
+	local name=$1
+	local status=$2
+	docker ps \
+		--all \
+		--quiet \
+		--filter name="$name" \
+		--filter status="$status"
+}
+
 CONTAINER_NAME=mock-pfi-pg
-RUNNING_CONTAINER=$(docker ps -aq --filter name=$CONTAINER_NAME --filter status=running)
-STOPPED_CONTAINER=$(docker ps -aq --filter name=$CONTAINER_NAME --filter status=exited)
+# shellcheck disable=SC2034
+RUNNING_CONTAINER="$(get_container $CONTAINER_NAME running)"
+# shellcheck disable=SC2034
+STOPPED_CONTAINER="$(get_container $CONTAINER_NAME exited)"
