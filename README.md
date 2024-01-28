@@ -102,7 +102,7 @@ Replace [these lines
 in](https://github.com/TBD54566975/tbdex-pfi-exemplar/blob/d192d294418d154f275d97e8c345d58a2bb06712/src/seed-offerings.ts#L87-L95)
 `seed-offerings.ts` with the appropriate issuer info.
 
-https://github.com/TBD54566975/tbdex-pfi-exemplar/blob/d192d294418d154f275d97e8c345d58a2bb06712/src/seed-offerings.ts#L87-L95
+https://github.com/TBD54566975/tbdex-pfi-exemplar/blob/11bc1ede3d326259a2dae4fe23470e1a47303e4e/src/seed-offerings.ts#L87-L95
 
 ```bash
 npm run seed-offerings
