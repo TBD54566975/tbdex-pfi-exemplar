@@ -1,5 +1,5 @@
-import { DevTools } from '@tbdex/http-client'
 import { createOrLoadDid } from './utils.js'
+import { VerifiableCredential } from '@web5/credentials'
 
 
 // get the did from the command line parameter
@@ -16,7 +16,7 @@ const issuer = await createOrLoadDid('issuer.json')
 //
 // Create a sanctions credential so that the PFI knows that Alice is legit.
 //
-const { signedCredential } = await DevTools.createCredential({
+const signedCredential = await VerifiableCredential.create({
   type    : 'SanctionCredential',
   issuer  : issuer,
   subject : customerDid,

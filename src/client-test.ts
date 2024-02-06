@@ -1,4 +1,5 @@
 import { TbdexHttpClient, DevTools, Rfq } from '@tbdex/http-client'
+import { VerifiableCredential } from '@web5/credentials'
 import fs from 'fs/promises'
 
 //
@@ -40,7 +41,7 @@ const alice = await createOrLoadDid('alice.json')
 //
 // Create a sanctions credential so that the PFI knows that Alice is legit.
 // This is normally done by a third party.
-const { signedCredential } = await DevTools.createCredential({
+const vc = await VerifiableCredential.create({
   type    : 'SanctionCredential',
   issuer  : issuer,
   subject : alice.did,
@@ -48,6 +49,7 @@ const { signedCredential } = await DevTools.createCredential({
     'beep': 'boop'
   }
 })
+const vcJwt = await vc.sign({ did: issuer.did })
 
 //
 //
@@ -68,7 +70,7 @@ const rfq = Rfq.create({
         reason: 'I got kids'
       }
     },
-    claims: [signedCredential]
+    claims: [vcJwt]
   }
 })
 

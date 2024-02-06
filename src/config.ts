@@ -4,8 +4,7 @@ import type { LogLevelDesc } from 'loglevel'
 import fs from 'node:fs'
 
 import 'dotenv/config'
-
-import { DidIonMethod, PortableDid } from '@web5/dids'
+import { DidDht, PortableDid } from '@web5/dids'
 
 export type Environment = 'local' | 'staging' | 'production'
 
@@ -39,11 +38,17 @@ export const config: Config = {
 // a new one will be generated every time the process starts.
 if (!config.did) {
   console.log('Creating an ephemeral DID.....')
-  const DidIon = await DidIonMethod.create({
-    services: [{ id: 'pfi', type: 'PFI', serviceEndpoint: config.host }]
-  })
+  const did = await DidDht.create({
+    options: {
+      services: [
+        {
+          id: 'pfi',
+          type: 'PFI',
+          serviceEndpoint: [config.host]
+        }
+      ]
+    }})
 
-
-  config.did = DidIon
-  fs.writeFileSync('server-did.txt', config.did.did)
+  config.did = did
+  fs.writeFileSync('server-did.txt', config.did.uri)
 }

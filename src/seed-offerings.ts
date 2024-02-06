@@ -9,7 +9,7 @@ await Postgres.connect()
 await Postgres.clear()
 
 const offering = Offering.create({
-  metadata: { from: config.did.did },
+  metadata: { from: config.did.uri },
   data: {
     description: 'fake offering 1',
     payoutUnitsPerPayinUnit: '0.0069', // ex. we send 100 dollars, so that means 14550.00 KES

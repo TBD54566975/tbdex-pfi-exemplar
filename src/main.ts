@@ -50,7 +50,7 @@ const server = httpApi.listen(config.port, () => {
   log.info(`Mock PFI listening on port ${config.port}`)
 })
 
-console.log('PFI DID: ', config.did.did)
+console.log('PFI DID: ', config.did.uri)
 
 httpApi.api.get('/', (req, res) => {
   res.send('Please use the tbdex protocol to communicate with this server or a suitable library: https://github.com/TBD54566975/tbdex-protocol')

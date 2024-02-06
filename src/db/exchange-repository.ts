@@ -139,7 +139,7 @@ class _ExchangeRepository implements ExchangesApi {
     if (message.kind == 'rfq') {
       const quote = Quote.create({
         metadata: {
-          from: config.did.did,
+          from: config.did.uri,
           to: message.from,
           exchangeId: message.exchangeId
         },
@@ -162,7 +162,7 @@ class _ExchangeRepository implements ExchangesApi {
     if (message.kind == 'order') {
       let orderStatus = OrderStatus.create({
         metadata: {
-          from: config.did.did,
+          from: config.did.uri,
           to: message.from,
           exchangeId: message.exchangeId
         },
@@ -177,7 +177,7 @@ class _ExchangeRepository implements ExchangesApi {
 
       orderStatus = OrderStatus.create({
         metadata: {
-          from: config.did.did,
+          from: config.did.uri,
           to: message.from,
           exchangeId: message.exchangeId
         },
@@ -191,7 +191,7 @@ class _ExchangeRepository implements ExchangesApi {
       // finally close the exchange
       const close = Close.create({
         metadata: {
-          from: config.did.did,
+          from: config.did.uri,
           to: message.from,
           exchangeId: message.exchangeId
         },
