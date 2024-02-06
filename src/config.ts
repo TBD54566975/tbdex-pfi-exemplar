@@ -39,7 +39,7 @@ export const config: Config = {
 // a new one will be generated every time the process starts.
 if (!config.did) {
   console.log('Creating an ephemeral DID.....')
-  const DidDht = await DidDhtMethod.create({
+  const DidDht = await DidDhtMethod.create({ publish: true,
     services: [{ id: 'pfi', type: 'PFI', serviceEndpoint: config.host }]
   })
 
