@@ -4,12 +4,7 @@ import type { LogLevelDesc } from 'loglevel'
 import fs from 'node:fs'
 
 import 'dotenv/config'
-<<<<<<< HEAD
-import { DidDhtMethod, PortableDid } from '@web5/dids'
-=======
-
 import { PortableDid, DidDhtMethod } from '@web5/dids'
->>>>>>> 976967b7bb605c4d6efd4b711758f9f3ecc61a65
 
 export type Environment = 'local' | 'staging' | 'production'
 
