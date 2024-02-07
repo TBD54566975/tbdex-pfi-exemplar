@@ -5,7 +5,7 @@ import fs from 'node:fs'
 
 import 'dotenv/config'
 
-import { DidIonMethod, PortableDid } from '@web5/dids'
+import { PortableDid, DidDhtMethod } from '@web5/dids'
 
 export type Environment = 'local' | 'staging' | 'production'
 
@@ -39,11 +39,11 @@ export const config: Config = {
 // a new one will be generated every time the process starts.
 if (!config.did) {
   console.log('Creating an ephemeral DID.....')
-  const DidIon = await DidIonMethod.create({
+  const DidDht = await DidDhtMethod.create({ publish: true,
     services: [{ id: 'pfi', type: 'PFI', serviceEndpoint: config.host }]
   })
 
 
-  config.did = DidIon
+  config.did = DidDht
   fs.writeFileSync('server-did.txt', config.did.did)
 }

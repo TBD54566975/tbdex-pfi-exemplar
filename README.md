@@ -67,7 +67,7 @@ based on your OS' package manager.
 > Make sure you have all the [prerequisites](#development-prerequisites)
 
 1. Clone the repo and `cd` into the project directory
-2. `/db/scripts/start-pg` from your command line to start a `psql` container by
+2. `./db/scripts/start-pg` from your command line to start a `psql` container by
    running.
 3. `./db/scripts/migrate` to perform database migrations
    * This only needs to be done once and then whenever changes are made in
