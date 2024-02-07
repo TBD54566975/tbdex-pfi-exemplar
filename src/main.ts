@@ -32,7 +32,7 @@ process.on('SIGTERM', async () => {
   gracefulShutdown()
 })
 
-const httpApi = new TbdexHttpServer({ exchangesApi: ExchangeRespository, offeringsApi: OfferingRepository })
+const httpApi = new TbdexHttpServer({ exchangesApi: ExchangeRespository, offeringsApi: OfferingRepository, pfiDid: config.pfiDid.did })
 
 httpApi.submit('rfq', async (ctx, rfq) => {
   await ExchangeRespository.addMessage({ message: rfq as Rfq })
@@ -50,7 +50,7 @@ const server = httpApi.listen(config.port, () => {
   log.info(`Mock PFI listening on port ${config.port}`)
 })
 
-console.log('PFI DID: ', config.did.uri)
+console.log('PFI DID: ', config.pfiDid.did)
 
 httpApi.api.get('/', (req, res) => {
   res.send('Please use the tbdex protocol to communicate with this server or a suitable library: https://github.com/TBD54566975/tbdex-protocol')

@@ -1,5 +1,6 @@
 import { TbdexHttpClient, Rfq, Quote, Order, OrderStatus, Close } from '@tbdex/http-client'
 import { createOrLoadDid } from './utils.js'
+import { PortableDid } from '@web5/dids'
 
 //
 // get the PFI did from the command line parameter
@@ -21,7 +22,7 @@ if (!signedCredential) {
 //  Connect to the PFI and get the list of offerings (offerings are resources - anyone can ask for them)
 //
 const [ offering ] = await TbdexHttpClient.getOfferings({ pfiDid: pfiDid })
-console.log('offering:', JSON.stringify(offering, null, 2))
+// console.log('offering:', JSON.stringify(offering, null, 2))
 
 
 //
@@ -58,7 +59,6 @@ await rfq.sign(alice)
 
 const resp = await TbdexHttpClient.sendMessage({ message: rfq })
 console.log('send rfq response', JSON.stringify(resp, null, 2))
-console.log(resp)
 
 //
 //
@@ -77,8 +77,8 @@ const exchanges = await TbdexHttpClient.getExchanges({
 const [ exchange ] = exchanges
 for (const message of exchange) {
   if (message instanceof Quote) {
-    console.log('we have a quote!')
     const quote = message as Quote
+    console.log('we have received a quote!', JSON.stringify(quote, null, 2))
 
     // Place an order against that quote:
     const order = Order.create({
@@ -86,20 +86,20 @@ for (const message of exchange) {
     })
     await order.sign(alice)
     const orderResponse = await TbdexHttpClient.sendMessage({ message: order })
+    console.log('sent order!')
     console.log('orderResponse', orderResponse)
 
     // poll for order status updates
-    const orderStatus = await pollForStatus(order, pfiDid, alice)
-    console.log('orderStatus', JSON.stringify(orderStatus, null, 2))
+    await pollForStatus(order, pfiDid, alice)
   }
 }
 
 /*
  * This is a very simple polling function that will poll for the status of an order.
  */
-async function pollForStatus(order, pfiDid, did) {
-    let close;
-    while (!close) {
+async function pollForStatus(order: Order, pfiDid: string, did: PortableDid) {
+  let close: Close
+  while (!close) {
     const exchanges = await TbdexHttpClient.getExchanges({
       pfiDid: pfiDid,
       did: did,
@@ -110,14 +110,14 @@ async function pollForStatus(order, pfiDid, did) {
 
     for (const message of exchange) {
       if (message instanceof OrderStatus) {
-        console.log('we have an order status')
+        console.log('we got a new order status')
         const orderStatus = message as OrderStatus
-        console.log('orderStatus', orderStatus)
+        console.log('orderStatus', JSON.stringify(orderStatus, null, 2))
       }
       else if(message instanceof Close) {
         console.log('we have a close message')
         close = message as Close
-        console.log('close', close)
+        console.log('close', JSON.stringify(close, null, 2))
         return close
       }
     }

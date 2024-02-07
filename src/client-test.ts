@@ -1,5 +1,6 @@
 import { TbdexHttpClient, DevTools, Rfq } from '@tbdex/http-client'
 import { VerifiableCredential } from '@web5/credentials'
+import { PortableDid } from '@web5/dids'
 import fs from 'fs/promises'
 
 //
@@ -28,7 +29,7 @@ const [ offering ] = await TbdexHttpClient.getOfferings({ pfiDid: PFI_DID })
 //    npm run seed-offerings to seed the PFI with the issuer DID.
 //
 // This means that the PFI will trust SanctionsCredentials issued by this faux issuer.
-const issuer = await createOrLoadDid('issuer.json')
+const issuer: PortableDid = await createOrLoadDid('issuer.json')
 console.log('issuer did:', issuer.did)
 
 
@@ -43,15 +44,16 @@ const alice = await createOrLoadDid('alice.json')
 // This is normally done by a third party.
 const vc = await VerifiableCredential.create({
   type    : 'SanctionCredential',
-  issuer  : issuer,
+  issuer  : issuer.did,
   subject : alice.did,
   data    : {
     'beep': 'boop'
   }
 })
-const vcJwt = await vc.sign({ did: issuer.did })
+const vcJwt = await vc.sign({ did: issuer })
 
 //
+console.log('vcJwt', vcJwt)
 //
 // And here we go with tbdex-protocol!
 const rfq = Rfq.create({
@@ -76,8 +78,8 @@ const rfq = Rfq.create({
 
 await rfq.sign(alice)
 
-const rasp = await TbdexHttpClient.sendMessage({ message: rfq })
-console.log('send rfq response', JSON.stringify(rasp, null, 2))
+console.log('PFI DID', PFI_DID)
+await TbdexHttpClient.sendMessage({ message: rfq })
 
 //
 //

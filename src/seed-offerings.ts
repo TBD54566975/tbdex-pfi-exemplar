@@ -9,7 +9,7 @@ await Postgres.connect()
 await Postgres.clear()
 
 const offering = Offering.create({
-  metadata: { from: config.did.uri },
+  metadata: { from: config.pfiDid.did },
   data: {
     description: 'fake offering 1',
     payoutUnitsPerPayinUnit: '0.0069', // ex. we send 100 dollars, so that means 14550.00 KES
@@ -83,16 +83,14 @@ const offering = Offering.create({
                 type: 'string',
                 pattern: '^SanctionCredential$'
               }
+            },
+            {
+              path: ['$.issuer'],
+              filter: {
+                type: 'string',
+                const: 'did:key:z6Mku48JdRZTzyXXcTeRwiHXud4XYJVJ8jUhoJRdz7Va7MgW'
+              }
             }
-            // uncomment the following with a valid issuer did from npm run example-create-issuer:
-            //,
-            //{
-            //  path: ['$.issuer'],
-            //  filter: {
-            //    type: 'string',
-            //    const: 'did:key:z6MkrA3GSkK3hxy4oQvezUSwTMR28Y97ZzYLHhBRjySLKfjB'
-            //  }
-            //}
           ]
         }
       }]
@@ -100,5 +98,5 @@ const offering = Offering.create({
   }
 })
 
-await offering.sign(config.did)
+await offering.sign(config.pfiDid)
 await OfferingRepository.create(offering)

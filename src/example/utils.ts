@@ -1,8 +1,9 @@
 import { DevTools } from '@tbdex/http-client'
+import { PortableDid } from '@web5/dids'
 import fs from 'fs/promises'
 
 
-export async function createOrLoadDid(filename: string) {
+export async function createOrLoadDid(filename: string): Promise<PortableDid> {
 
   // Check if the file exists
   try {

@@ -4,7 +4,7 @@ import type { LogLevelDesc } from 'loglevel'
 import fs from 'node:fs'
 
 import 'dotenv/config'
-import { DidDht, PortableDid } from '@web5/dids'
+import { DidDhtMethod, PortableDid } from '@web5/dids'
 
 export type Environment = 'local' | 'staging' | 'production'
 
@@ -14,7 +14,7 @@ export type Config = {
   host: string;
   port: number;
   db: PoolConfig
-  did: PortableDid
+  pfiDid: PortableDid
   allowlist: string[]
 }
 
@@ -30,16 +30,17 @@ export const config: Config = {
     password : process.env['SEC_DB_PASSWORD'] || 'tbd',
     database : process.env['SEC_DB_NAME'] || 'mockpfi'
   },
-  did: undefined,
+  pfiDid: undefined,
   allowlist: JSON.parse(process.env['SEC_ALLOWLISTED_DIDS'] || '[]')
 }
 
 // create ephemeral PFI did if one wasn't provided. Note: this DID and associated keys aren't persisted!
 // a new one will be generated every time the process starts.
-if (!config.did) {
+if (!config.pfiDid) {
   console.log('Creating an ephemeral DID.....')
-  const did = await DidDht.create({
-    options: {
+  const didDht = await DidDhtMethod.create(
+    {
+      publish: true,
       services: [
         {
           id: 'pfi',
@@ -47,8 +48,8 @@ if (!config.did) {
           serviceEndpoint: [config.host]
         }
       ]
-    }})
+    })
 
-  config.did = did
-  fs.writeFileSync('server-did.txt', config.did.uri)
+  config.pfiDid = didDht
+  fs.writeFileSync('server-did.txt', config.pfiDid.did)
 }
