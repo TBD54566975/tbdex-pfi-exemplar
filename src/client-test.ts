@@ -1,6 +1,6 @@
-import { TbdexHttpClient, DevTools, Rfq } from '@tbdex/http-client'
+import { TbdexHttpClient, Rfq } from '@tbdex/http-client'
 import { VerifiableCredential } from '@web5/credentials'
-import { PortableDid } from '@web5/dids'
+import { PortableDid, DidDhtMethod } from '@web5/dids'
 import fs from 'fs/promises'
 
 //
@@ -105,7 +105,7 @@ async function createOrLoadDid(filename: string) {
   } catch (error) {
     // If the file doesn't exist, generate a new DID
     if (error.code === 'ENOENT') {
-      const did = await DevTools.createDid()
+      const did = await DidDhtMethod.create({ publish: true })
       await fs.writeFile(filename, JSON.stringify(did, null, 2))
       return did
     }

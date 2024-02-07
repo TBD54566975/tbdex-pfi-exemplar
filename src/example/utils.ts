@@ -1,5 +1,4 @@
-import { DevTools } from '@tbdex/http-client'
-import { PortableDid } from '@web5/dids'
+import { PortableDid, DidDhtMethod } from '@web5/dids'
 import fs from 'fs/promises'
 
 
@@ -12,7 +11,7 @@ export async function createOrLoadDid(filename: string): Promise<PortableDid> {
   } catch (error) {
     // If the file doesn't exist, generate a new DID
     if (error.code === 'ENOENT') {
-      const did = await DevTools.createDid()
+      const did = await DidDhtMethod.create({ publish: true })
       await fs.writeFile(filename, JSON.stringify(did, null, 2))
       return did
     }
