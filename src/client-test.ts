@@ -2,7 +2,6 @@ import { TbdexHttpClient, Rfq } from '@tbdex/http-client'
 import { VerifiableCredential } from '@web5/credentials'
 import { PortableDid, DidDhtMethod } from '@web5/dids'
 import fs from 'fs/promises'
-import { config } from './config.js'
 
 //
 //
@@ -11,14 +10,14 @@ import { config } from './config.js'
 //
 
 // load server-did (this will be created when you run server did, or you can copy/paste one):
-let PFI_DID = config.pfiDid.did
+let PFI_DID: PortableDid = await createOrLoadDid('pfi.json')
 
 
 //
 //
 //  Connect to the PFI and get the list of offerings (offerings are resources - anyone can ask for them)
 //
-const [ offering ] = await TbdexHttpClient.getOfferings({ pfiDid: PFI_DID })
+const [ offering ] = await TbdexHttpClient.getOfferings({ pfiDid: PFI_DID.did })
 //console.log('offering', JSON.stringify(offering, null, 2))
 
 
@@ -57,7 +56,7 @@ const vcJwt = await vc.sign({ did: issuer })
 //
 // And here we go with tbdex-protocol!
 const rfq = Rfq.create({
-  metadata: { from: alice.did, to: PFI_DID },
+  metadata: { from: alice.did, to: PFI_DID.did },
   data: {
     offeringId: offering.id,
     payinAmount: '100.00',
@@ -85,7 +84,7 @@ await TbdexHttpClient.sendMessage({ message: rfq })
 // All interaction with the PFI happens in the context of an exchange.
 // This is where for example a quote would show up in result to an RFQ.
 const exchanges = await TbdexHttpClient.getExchanges({
-  pfiDid: PFI_DID,
+  pfiDid: PFI_DID.did,
   did: alice,
   filter: { id: rfq.exchangeId }
 })
@@ -99,7 +98,7 @@ async function createOrLoadDid(filename: string) {
   // Check if the file exists
   try {
     const data = await fs.readFile(filename, 'utf-8')
-    console.log('loading from file')
+    console.log('loading from file', filename)
     return JSON.parse(data)
   } catch (error) {
     // If the file doesn't exist, generate a new DID
