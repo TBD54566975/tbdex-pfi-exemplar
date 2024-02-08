@@ -1,7 +1,8 @@
 import { TbdexHttpClient, Rfq } from '@tbdex/http-client'
 import { VerifiableCredential } from '@web5/credentials'
-import { PortableDid, DidDhtMethod } from '@web5/dids'
-import fs from 'fs/promises'
+import { PortableDid } from '@web5/dids'
+import { createOrLoadDid } from './example/utils.js'
+import { config } from './config.js'
 
 //
 //
@@ -10,7 +11,8 @@ import fs from 'fs/promises'
 //
 
 // load server-did (this will be created when you run server did, or you can copy/paste one):
-let PFI_DID: PortableDid = await createOrLoadDid('pfi.json')
+let PFI_DID: PortableDid = config.pfiDid
+console.log('PFI DID FROM CLIENT:', PFI_DID.did)
 
 
 //
@@ -37,6 +39,7 @@ console.log('issuer did:', issuer.did)
 //
 // Create a did for Alice, who is the customer of the PFI in this case.
 const alice = await createOrLoadDid('alice.json')
+console.log('alice did:', alice.did)
 
 //
 //
@@ -90,23 +93,3 @@ const exchanges = await TbdexHttpClient.getExchanges({
 })
 
 console.log('exchanges', JSON.stringify(exchanges, null, 2))
-
-
-// utility function
-async function createOrLoadDid(filename: string) {
-
-  // Check if the file exists
-  try {
-    const data = await fs.readFile(filename, 'utf-8')
-    console.log('loading from file', filename)
-    return JSON.parse(data)
-  } catch (error) {
-    // If the file doesn't exist, generate a new DID
-    if (error.code === 'ENOENT') {
-      const did = await DidDhtMethod.create({ publish: true })
-      await fs.writeFile(filename, JSON.stringify(did, null, 2))
-      return did
-    }
-    console.error('Error reading from file:', error)
-  }
-}

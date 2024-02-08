@@ -38,7 +38,7 @@ export const config: Config = {
 // create ephemeral PFI did if one wasn't provided. Note: this DID and associated keys aren't persisted!
 // a new one will be generated every time the process starts.
 if (!config.pfiDid) {
-  console.log('Creating an ephemeral PFI DID.....')
+  console.log('PFI DID was not loaded from config. Creating an ephemeral PFI DID.....')
   const DidDht = await DidDhtMethod.create({ publish: true,
     services: [{ id: 'pfi', type: 'PFI', serviceEndpoint: config.host }]
   })
