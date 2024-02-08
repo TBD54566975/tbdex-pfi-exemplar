@@ -1,8 +1,8 @@
-import { DidDhtMethod } from '@web5/dids'
+import { PortableDid, DidDhtMethod } from '@web5/dids'
 import fs from 'fs/promises'
 
 
-export async function createOrLoadDid(filename: string) {
+export async function createOrLoadDid(filename: string): Promise<PortableDid> {
 
   // Check if the file exists
   try {
@@ -11,9 +11,25 @@ export async function createOrLoadDid(filename: string) {
   } catch (error) {
     // If the file doesn't exist, generate a new DID
     if (error.code === 'ENOENT') {
-      const did = await DidDhtMethod.create({ publish: true })
-      await fs.writeFile(filename, JSON.stringify(did, null, 2))
-      return did
+      if (filename.includes('pfi')) {
+        const did = await DidDhtMethod.create({
+          publish: true,
+          services: [
+            {
+              id: 'pfi',
+              type: 'PFI',
+              serviceEndpoint: 'http://localhost:9000'
+            }]
+        })
+
+        await fs.writeFile(filename, JSON.stringify(did, null, 2))
+        return did
+      }
+      else {
+        const did = await DidDhtMethod.create({ publish: true })
+        await fs.writeFile(filename, JSON.stringify(did, null, 2))
+        return did
+      }
     }
     console.error('Error reading from file:', error)
   }

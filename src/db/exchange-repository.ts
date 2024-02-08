@@ -139,7 +139,7 @@ class _ExchangeRepository implements ExchangesApi {
     if (message.kind == 'rfq') {
       const quote = Quote.create({
         metadata: {
-          from: config.did.did,
+          from: config.pfiDid.did,
           to: message.from,
           exchangeId: message.exchangeId
         },
@@ -155,14 +155,14 @@ class _ExchangeRepository implements ExchangesApi {
           }
         }
       })
-      await quote.sign(config.did)
+      await quote.sign(config.pfiDid)
       this.addMessage({ message: quote as Quote})
     }
 
     if (message.kind == 'order') {
       let orderStatus = OrderStatus.create({
         metadata: {
-          from: config.did.did,
+          from: config.pfiDid.did,
           to: message.from,
           exchangeId: message.exchangeId
         },
@@ -170,14 +170,14 @@ class _ExchangeRepository implements ExchangesApi {
           orderStatus: 'PROCESSING'
         }
       })
-      await orderStatus.sign(config.did)
+      await orderStatus.sign(config.pfiDid)
       this.addMessage({ message: orderStatus as OrderStatus})
 
       await new Promise(resolve => setTimeout(resolve, 1000)) // 1 second delay
 
       orderStatus = OrderStatus.create({
         metadata: {
-          from: config.did.did,
+          from: config.pfiDid.did,
           to: message.from,
           exchangeId: message.exchangeId
         },
@@ -185,13 +185,13 @@ class _ExchangeRepository implements ExchangesApi {
           orderStatus: 'COMPLETED'
         }
       })
-      await orderStatus.sign(config.did)
+      await orderStatus.sign(config.pfiDid)
       this.addMessage({ message: orderStatus as OrderStatus})
 
       // finally close the exchange
       const close = Close.create({
         metadata: {
-          from: config.did.did,
+          from: config.pfiDid.did,
           to: message.from,
           exchangeId: message.exchangeId
         },
@@ -199,7 +199,7 @@ class _ExchangeRepository implements ExchangesApi {
           reason: 'Order fulfilled'
         }
       })
-      await close.sign(config.did)
+      await close.sign(config.pfiDid)
       this.addMessage({ message: close as Close })
     }
   }
