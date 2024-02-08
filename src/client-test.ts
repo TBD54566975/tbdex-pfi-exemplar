@@ -2,6 +2,7 @@ import { TbdexHttpClient, Rfq } from '@tbdex/http-client'
 import { VerifiableCredential } from '@web5/credentials'
 import { PortableDid, DidDhtMethod } from '@web5/dids'
 import fs from 'fs/promises'
+import { config } from './config.js'
 
 //
 //
@@ -10,7 +11,7 @@ import fs from 'fs/promises'
 //
 
 // load server-did (this will be created when you run server did, or you can copy/paste one):
-let PFI_DID = await fs.readFile('server-did.txt', 'utf-8')
+let PFI_DID = config.pfiDid.did
 
 
 //
@@ -53,7 +54,6 @@ const vc = await VerifiableCredential.create({
 const vcJwt = await vc.sign({ did: issuer })
 
 //
-console.log('vcJwt', vcJwt)
 //
 // And here we go with tbdex-protocol!
 const rfq = Rfq.create({
@@ -78,7 +78,6 @@ const rfq = Rfq.create({
 
 await rfq.sign(alice)
 
-console.log('PFI DID', PFI_DID)
 await TbdexHttpClient.sendMessage({ message: rfq })
 
 //

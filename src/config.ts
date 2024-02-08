@@ -5,6 +5,7 @@ import fs from 'node:fs'
 
 import 'dotenv/config'
 import { PortableDid, DidDhtMethod } from '@web5/dids'
+import { createOrLoadDid } from './example/utils.js'
 
 export type Environment = 'local' | 'staging' | 'production'
 
@@ -30,19 +31,19 @@ export const config: Config = {
     password : process.env['SEC_DB_PASSWORD'] || 'tbd',
     database : process.env['SEC_DB_NAME'] || 'mockpfi'
   },
-  pfiDid: undefined,
+  pfiDid: await createOrLoadDid('pfi.json'),
   allowlist: JSON.parse(process.env['SEC_ALLOWLISTED_DIDS'] || '[]')
 }
 
 // create ephemeral PFI did if one wasn't provided. Note: this DID and associated keys aren't persisted!
 // a new one will be generated every time the process starts.
 if (!config.pfiDid) {
-  console.log('Creating an ephemeral DID.....')
+  console.log('Creating an ephemeral PFI DID.....')
   const DidDht = await DidDhtMethod.create({ publish: true,
     services: [{ id: 'pfi', type: 'PFI', serviceEndpoint: config.host }]
   })
 
 
   config.pfiDid = DidDht
-  fs.writeFileSync('server-did.txt', config.pfiDid.did)
+  fs.writeFileSync('pfi.json', JSON.stringify(config.pfiDid, null, 2))
 }

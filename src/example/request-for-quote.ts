@@ -22,7 +22,7 @@ if (!signedCredential) {
 //  Connect to the PFI and get the list of offerings (offerings are resources - anyone can ask for them)
 //
 const [ offering ] = await TbdexHttpClient.getOfferings({ pfiDid: pfiDid })
- console.log('offering:', JSON.stringify(offering, null, 2))
+console.log('got offering:', JSON.stringify(offering, null, 2))
 
 
 //
@@ -57,8 +57,8 @@ const rfq = Rfq.create({
 
 await rfq.sign(alice)
 
+console.log('sending RFQ:', JSON.stringify(rfq, null, 2))
 await TbdexHttpClient.sendMessage({ message: rfq })
-console.log('send rfq response', JSON.stringify(resp, null, 2))
 
 //
 //
@@ -85,9 +85,8 @@ for (const message of exchange) {
       metadata: { from: alice.did, to: pfiDid, exchangeId: quote.exchangeId },
     })
     await order.sign(alice)
+    console.log('Sending order: ', JSON.stringify(order, null, 2))
     await TbdexHttpClient.sendMessage({ message: order })
-    console.log('sent order!')
-    console.log('orderResponse', orderResponse)
 
     // poll for order status updates
     await pollForStatus(order, pfiDid, alice)
