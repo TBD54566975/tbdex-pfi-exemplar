@@ -1,4 +1,4 @@
-import { PortableDid } from '@web5/dids'
+import { BearerDid } from '@web5/dids'
 import { createOrLoadDid } from './utils.js'
 import { VerifiableCredential } from '@web5/credentials'
 
@@ -6,7 +6,7 @@ import { VerifiableCredential } from '@web5/credentials'
 // get the did from the command line parameter
 const customerDid: string = process.argv[2]
 
-const issuer : PortableDid = await createOrLoadDid('issuer.json')
+const issuer : BearerDid = await createOrLoadDid('issuer.json')
 
 //
 // At this point we can check if the user is sanctioned or not and decide to issue the credential.
@@ -19,7 +19,7 @@ const issuer : PortableDid = await createOrLoadDid('issuer.json')
 //
 const vc = await VerifiableCredential.create({
   type    : 'SanctionCredential',
-  issuer  : issuer.did,
+  issuer  : issuer.uri,
   subject : customerDid,
   data    : {
     'beep': 'boop'

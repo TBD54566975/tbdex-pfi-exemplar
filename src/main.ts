@@ -32,17 +32,21 @@ process.on('SIGTERM', async () => {
   gracefulShutdown()
 })
 
-const httpApi = new TbdexHttpServer({ exchangesApi: ExchangeRespository, offeringsApi: OfferingRepository, pfiDid: config.pfiDid.did })
+const httpApi = new TbdexHttpServer({
+  exchangesApi: ExchangeRespository,
+  offeringsApi: OfferingRepository,
+  pfiDid: config.pfiDid.uri
+})
 
-httpApi.submit('rfq', async (ctx, rfq) => {
+httpApi.onSubmitRfq(async (ctx, rfq) => {
   await ExchangeRespository.addMessage({ message: rfq as Rfq })
 })
 
-httpApi.submit('order', async (ctx, order) => {
+httpApi.onSubmitOrder(async (ctx, order) => {
   await ExchangeRespository.addMessage({ message: order as Order })
 })
 
-httpApi.submit('close', async (ctx, close) => {
+httpApi.onSubmitClose(async (ctx, close) => {
   await ExchangeRespository.addMessage({ message: close as Close })
 })
 
@@ -50,7 +54,7 @@ const server = httpApi.listen(config.port, () => {
   log.info(`Mock PFI listening on port ${config.port}`)
 })
 
-console.log('PFI DID FROM SERVER: ', config.pfiDid.did)
+console.log('PFI DID FROM SERVER: ', config.pfiDid.uri)
 
 httpApi.api.get('/', (req, res) => {
   res.send('Please use the tbdex protocol to communicate with this server or a suitable library: https://github.com/TBD54566975/tbdex-protocol')

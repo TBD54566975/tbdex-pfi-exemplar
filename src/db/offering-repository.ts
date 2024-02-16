@@ -1,6 +1,6 @@
 import type { OfferingsApi } from '@tbdex/http-server'
 
-import { Offering } from '@tbdex/http-server'
+import { Offering, Parser } from '@tbdex/http-server'
 import { Postgres } from './postgres.js'
 
 export class _OfferingRepository implements OfferingsApi {
@@ -8,8 +8,8 @@ export class _OfferingRepository implements OfferingsApi {
     let result = await Postgres.client.insertInto('offering')
       .values({
         offeringid: offering.id,
-        payoutcurrency: offering.payoutCurrency.currencyCode,
-        payincurrency: offering.payinCurrency.currencyCode,
+        payoutcurrency: offering.data.payoutCurrency.currencyCode,
+        payincurrency: offering.data.payinCurrency.currencyCode,
         offering: JSON.stringify(offering)
       })
       .execute()
@@ -27,7 +27,7 @@ export class _OfferingRepository implements OfferingsApi {
       return undefined
     }
 
-    return Offering.factory(result.offering)
+    return await Parser.parseResource(result.offering) as Offering
 
   }
 
@@ -38,7 +38,7 @@ export class _OfferingRepository implements OfferingsApi {
 
     const offerings: Offering[] = []
     for (let result of results) {
-      const offering = Offering.factory(result.offering)
+      const offering = await Parser.parseResource(result.offering) as Offering
       offerings.push(offering)
     }
 

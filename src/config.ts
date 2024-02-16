@@ -4,7 +4,7 @@ import type { LogLevelDesc } from 'loglevel'
 import fs from 'node:fs'
 
 import 'dotenv/config'
-import { PortableDid, DidDhtMethod } from '@web5/dids'
+import { BearerDid, DidDht } from '@web5/dids'
 import { createOrLoadDid } from './example/utils.js'
 
 export type Environment = 'local' | 'staging' | 'production'
@@ -15,7 +15,7 @@ export type Config = {
   host: string;
   port: number;
   db: PoolConfig
-  pfiDid: PortableDid
+  pfiDid: BearerDid
   allowlist: string[]
 }
 
@@ -39,11 +39,10 @@ export const config: Config = {
 // a new one will be generated every time the process starts.
 if (!config.pfiDid) {
   console.log('PFI DID was not loaded from config. Creating an ephemeral PFI DID.....')
-  const DidDht = await DidDhtMethod.create({ publish: true,
+  const pfiDid = await DidDht.create({ options: {
     services: [{ id: 'pfi', type: 'PFI', serviceEndpoint: config.host }]
-  })
+  }})
 
-
-  config.pfiDid = DidDht
+  config.pfiDid = pfiDid
   fs.writeFileSync('pfi.json', JSON.stringify(config.pfiDid, null, 2))
 }

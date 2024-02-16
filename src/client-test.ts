@@ -1,6 +1,6 @@
 import { TbdexHttpClient, Rfq } from '@tbdex/http-client'
 import { VerifiableCredential } from '@web5/credentials'
-import { PortableDid } from '@web5/dids'
+import { BearerDid } from '@web5/dids'
 import { createOrLoadDid } from './example/utils.js'
 import { config } from './config.js'
 
@@ -11,17 +11,14 @@ import { config } from './config.js'
 //
 
 // load server-did (this will be created when you run server did, or you can copy/paste one):
-let PFI_DID: PortableDid = config.pfiDid
-console.log('PFI DID FROM CLIENT:', PFI_DID.did)
-
+let PFI_DID: BearerDid = config.pfiDid
+console.log('PFI DID FROM CLIENT:', PFI_DID.uri)
 
 //
 //
 //  Connect to the PFI and get the list of offerings (offerings are resources - anyone can ask for them)
 //
-const [ offering ] = await TbdexHttpClient.getOfferings({ pfiDid: PFI_DID.did })
-//console.log('offering', JSON.stringify(offering, null, 2))
-
+const [ offering ] = await TbdexHttpClient.getOfferings({ pfiDid: PFI_DID.uri })
 
 //
 //
@@ -31,15 +28,15 @@ const [ offering ] = await TbdexHttpClient.getOfferings({ pfiDid: PFI_DID.did })
 //    npm run seed-offerings to seed the PFI with the issuer DID.
 //
 // This means that the PFI will trust SanctionsCredentials issued by this faux issuer.
-const issuer: PortableDid = await createOrLoadDid('issuer.json')
-console.log('issuer did:', issuer.did)
+const issuer: BearerDid = await createOrLoadDid('issuer.json')
+console.log('issuer did:', issuer.uri)
 
 
 //
 //
 // Create a did for Alice, who is the customer of the PFI in this case.
 const alice = await createOrLoadDid('alice.json')
-console.log('alice did:', alice.did)
+console.log('alice did:', alice.uri)
 
 //
 //
@@ -47,8 +44,8 @@ console.log('alice did:', alice.did)
 // This is normally done by a third party.
 const vc = await VerifiableCredential.create({
   type    : 'SanctionCredential',
-  issuer  : issuer.did,
-  subject : alice.did,
+  issuer  : issuer.uri,
+  subject : alice.uri,
   data    : {
     'beep': 'boop'
   }
@@ -59,7 +56,7 @@ const vcJwt = await vc.sign({ did: issuer })
 //
 // And here we go with tbdex-protocol!
 const rfq = Rfq.create({
-  metadata: { from: alice.did, to: PFI_DID.did },
+  metadata: { from: alice.uri, to: PFI_DID.uri },
   data: {
     offeringId: offering.id,
     payinAmount: '100.00',
@@ -87,7 +84,7 @@ await TbdexHttpClient.sendMessage({ message: rfq })
 // All interaction with the PFI happens in the context of an exchange.
 // This is where for example a quote would show up in result to an RFQ.
 const exchanges = await TbdexHttpClient.getExchanges({
-  pfiDid: PFI_DID.did,
+  pfiDid: PFI_DID.uri,
   did: alice,
   filter: { id: rfq.exchangeId }
 })

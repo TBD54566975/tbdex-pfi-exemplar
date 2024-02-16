@@ -1,6 +1,6 @@
 import { TbdexHttpClient, Rfq, Quote, Order, OrderStatus, Close } from '@tbdex/http-client'
 import { createOrLoadDid } from './utils.js'
-import { PortableDid } from '@web5/dids'
+import { BearerDid } from '@web5/dids'
 
 //
 // get the PFI did from the command line parameter
@@ -36,7 +36,7 @@ const alice = await createOrLoadDid('alice.json')
 
 // First, Create an RFQ
 const rfq = Rfq.create({
-  metadata: { from: alice.did, to: pfiDid },
+  metadata: { from: alice.uri, to: pfiDid },
   data: {
     offeringId: offering.id,
     payinAmount: '100.00',
@@ -57,8 +57,8 @@ const rfq = Rfq.create({
 
 await rfq.sign(alice)
 
-console.log('sending RFQ:', JSON.stringify(rfq, null, 2))
-await TbdexHttpClient.sendMessage({ message: rfq })
+await TbdexHttpClient.sendMessage({ message: rfq, replyTo: alice.uri })
+console.log('sent RFQ: ', JSON.stringify(rfq, null, 2))
 
 //
 //
@@ -71,10 +71,12 @@ const exchanges = await TbdexHttpClient.getExchanges({
 })
 
 
+console.log('got exchanges:', JSON.stringify(exchanges, null, 2))
 //
 // Now lets get the quote out of the returned exchange
 //
 const [ exchange ] = exchanges
+
 for (const message of exchange) {
   if (message instanceof Quote) {
     const quote = message as Quote
@@ -82,11 +84,11 @@ for (const message of exchange) {
 
     // Place an order against that quote:
     const order = Order.create({
-      metadata: { from: alice.did, to: pfiDid, exchangeId: quote.exchangeId },
+      metadata: { from: alice.uri, to: pfiDid, exchangeId: quote.exchangeId },
     })
     await order.sign(alice)
-    console.log('Sending order: ', JSON.stringify(order, null, 2))
     await TbdexHttpClient.sendMessage({ message: order })
+    console.log('Sent order: ', JSON.stringify(order, null, 2))
 
     // poll for order status updates
     await pollForStatus(order, pfiDid, alice)
@@ -96,7 +98,7 @@ for (const message of exchange) {
 /*
  * This is a very simple polling function that will poll for the status of an order.
  */
-async function pollForStatus(order: Order, pfiDid: string, did: PortableDid) {
+async function pollForStatus(order: Order, pfiDid: string, did: BearerDid) {
   let close: Close
   while (!close) {
     const exchanges = await TbdexHttpClient.getExchanges({
