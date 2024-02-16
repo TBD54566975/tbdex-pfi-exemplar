@@ -142,10 +142,10 @@ npm run server
 ### Step 7: Run a tbDEX exchange
 Run a tbDEX transaction (or exchange):
 
-Take the customer DID string and the signed VC string (both long) and run:
+Take the PFI DID string and the signed VC string (both long) and run:
 
 ```bash
-npm run example-rfq $pfi_server_did $signed_vc
+npm run example-e2e-exchange $pfi_server_did $signed_vc
 ```
 
 With the values from Step 5 and Step 6. You will see the server print out the
