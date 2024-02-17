@@ -9,7 +9,7 @@ await Postgres.connect()
 await Postgres.clear()
 
 const offering = Offering.create({
-  metadata: { from: config.pfiDid.did },
+  metadata: { from: config.pfiDid.uri },
   data: {
     description: 'fake offering 1',
     payoutUnitsPerPayinUnit: '0.0069', // ex. we send 100 dollars, so that means 14550.00 KES
@@ -85,7 +85,6 @@ const offering = Offering.create({
               }
             },
             // uncomment the following with a valid issuer did from npm run example-create-issuer:
-            //,
             //{
             //  path: ['$.issuer'],
             //  filter: {

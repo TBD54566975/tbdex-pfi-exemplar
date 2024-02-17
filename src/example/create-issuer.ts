@@ -4,7 +4,7 @@ import { createOrLoadDid } from './utils.js'
 // We need to create an issuer, which will issue VCs to the customer, and is trusted by the PFI.
 //
 const issuer = await createOrLoadDid('issuer.json')
-console.log('\nIssuer did:', issuer.did)
+console.log('\nIssuer did:', issuer.uri)
 
 
 console.log(`
@@ -14,7 +14,7 @@ Place the following in the seed-offerings.ts file as part of the constraint fiel
   path: ['$.issuer'],
   filter: {
     type: 'string',
-    const: '${issuer.did}'
+    const: '${issuer.uri}'
   }
 }
 

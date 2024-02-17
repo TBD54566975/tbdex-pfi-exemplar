@@ -1,20 +1,19 @@
-import { Close, MessageKind, MessageKindClass, Order, OrderStatus, Quote, ExchangesApi, Rfq, GetExchangesFilter, MessageModel } from '@tbdex/http-server'
-import { Message } from '@tbdex/http-server'
-
+import { Message, Close, Order, OrderStatus, Quote, ExchangesApi, Rfq, Parser } from '@tbdex/http-server'
+import type { MessageModel, MessageKind, GetExchangesFilter } from '@tbdex/http-server'
 import { Postgres } from './postgres.js'
 import { config } from '../config.js'
 
 class _ExchangeRepository implements ExchangesApi {
 
-  async getExchanges(opts: { filter: GetExchangesFilter }): Promise<MessageKindClass[][]> {
+  async getExchanges(opts: { filter: GetExchangesFilter }): Promise<Message[][]> {
     // TODO: try out GROUP BY! would do it now, just unsure what the return structure looks like
     const exchangeIds = opts.filter.id?.length ? opts.filter.id : []
 
     if (exchangeIds.length == 0) {
-      return this.getAllExchanges()
+      return await this.getAllExchanges()
     }
 
-    const exchanges: MessageKindClass[][] = []
+    const exchanges: Message[][] = []
     for (let id of exchangeIds) {
       console.log('calling id', id)
       // TODO: handle error property
@@ -30,7 +29,7 @@ class _ExchangeRepository implements ExchangesApi {
     return exchanges
   }
 
-  async getAllExchanges(): Promise<MessageKindClass[][]> {
+  async getAllExchanges(): Promise<Message[][]> {
     const results = await Postgres.client.selectFrom('exchange')
       .select(['message'])
       .orderBy('createdat', 'asc')
@@ -39,8 +38,7 @@ class _ExchangeRepository implements ExchangesApi {
     return this.composeMessages(results)
   }
 
-  async getExchange(opts: { id: string }): Promise<MessageKindClass[]> {
-    console.log('getting exchange for id', opts.id)
+  async getExchange(opts: { id: string }): Promise<Message[]> {
     const results = await Postgres.client.selectFrom('exchange')
       .select(['message'])
       .where(eb => eb.and({
@@ -49,17 +47,17 @@ class _ExchangeRepository implements ExchangesApi {
       .orderBy('createdat', 'asc')
       .execute()
 
-    const messages = this.composeMessages(results)
+    const messages = await this.composeMessages(results)
 
     return messages[0] ?? []
   }
 
-  private composeMessages(results: { message: MessageModel<MessageKind> }[]): MessageKindClass[][] {
-    const exchangeIdsToMessages: {[key: string]: MessageKindClass[]} = {}
+  private async composeMessages(results: { message: MessageModel }[]): Promise<Message[][]> {
+    const exchangeIdsToMessages: {[key: string]: Message[]} = {}
 
     for (let result of results) {
-      const message = Message.fromJson(result.message)
-      const exchangeId = message.exchangeId
+      const message = await Parser.parseMessage(result.message)
+      const exchangeId = message.metadata.exchangeId
       if (exchangeIdsToMessages[exchangeId]) {
         exchangeIdsToMessages[exchangeId].push(message)
       } else {
@@ -94,7 +92,7 @@ class _ExchangeRepository implements ExchangesApi {
     const orderStatuses: OrderStatus[] = []
 
     for (let result of results) {
-      const orderStatus = Message.fromJson(result.message) as OrderStatus
+      const orderStatus = await Parser.parseMessage(result.message) as OrderStatus
       orderStatuses.push(orderStatus)
     }
 
@@ -116,11 +114,11 @@ class _ExchangeRepository implements ExchangesApi {
       .executeTakeFirst()
 
     if (result) {
-      return Message.fromJson(result.message)
+      return await Parser.parseMessage(result.message)
     }
   }
 
-  async addMessage(opts: { message: MessageKindClass }) {
+  async addMessage(opts: { message: Message }) {
     const { message } = opts
     const subject = aliceMessageKinds.has(message.kind) ? message.from : message.to
 
@@ -139,7 +137,7 @@ class _ExchangeRepository implements ExchangesApi {
     if (message.kind == 'rfq') {
       const quote = Quote.create({
         metadata: {
-          from: config.pfiDid.did,
+          from: config.pfiDid.uri,
           to: message.from,
           exchangeId: message.exchangeId
         },
@@ -162,7 +160,7 @@ class _ExchangeRepository implements ExchangesApi {
     if (message.kind == 'order') {
       let orderStatus = OrderStatus.create({
         metadata: {
-          from: config.pfiDid.did,
+          from: config.pfiDid.uri,
           to: message.from,
           exchangeId: message.exchangeId
         },
@@ -177,7 +175,7 @@ class _ExchangeRepository implements ExchangesApi {
 
       orderStatus = OrderStatus.create({
         metadata: {
-          from: config.pfiDid.did,
+          from: config.pfiDid.uri,
           to: message.from,
           exchangeId: message.exchangeId
         },
@@ -191,7 +189,7 @@ class _ExchangeRepository implements ExchangesApi {
       // finally close the exchange
       const close = Close.create({
         metadata: {
-          from: config.pfiDid.did,
+          from: config.pfiDid.uri,
           to: message.from,
           exchangeId: message.exchangeId
         },
