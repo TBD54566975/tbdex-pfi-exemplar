@@ -84,13 +84,14 @@ const offering = Offering.create({
                 pattern: '^SanctionCredential$'
               }
             },
-            {
-              path: ['$.issuer'],
-              filter: {
-                type: 'string',
-                const: 'did:dht:ssmuk4ie1yq9anwmt5egdmq7imjycixx5t3up18a64ccitwn5y1y'
-              }
-            }
+            // uncomment the following with a valid issuer did from npm run example-create-issuer:
+            //{
+            //  path: ['$.issuer'],
+            //  filter: {
+            //    type: 'string',
+            //    const: 'did:key:z6MkrA3GSkK3hxy4oQvezUSwTMR28Y97ZzYLHhBRjySLKfjB'
+            //  }
+            //}
           ]
         }
       }]
