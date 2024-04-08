@@ -1,8 +1,8 @@
-import { TbdexHttpClient, Rfq } from '@tbdex/http-client'
-import { VerifiableCredential } from '@web5/credentials'
-import { BearerDid } from '@web5/dids'
-import { createOrLoadDid } from './example/utils.js'
-import { config } from './config.js'
+import { TbdexHttpClient, Rfq } from "@tbdex/http-client";
+import { VerifiableCredential } from "@web5/credentials";
+import { BearerDid } from "@web5/dids";
+import { createOrLoadDid } from "./example/utils.js";
+import { config } from "./config.js";
 
 //
 //
@@ -11,14 +11,14 @@ import { config } from './config.js'
 //
 
 // load server-did (this will be created when you run server did, or you can copy/paste one):
-let PFI_DID: BearerDid = config.pfiDid
-console.log('PFI DID FROM CLIENT:', PFI_DID.uri)
+let PFI_DID: BearerDid = config.pfiDid;
+console.log("PFI DID FROM CLIENT:", PFI_DID.uri);
 
 //
 //
 //  Connect to the PFI and get the list of offerings (offerings are resources - anyone can ask for them)
 //
-const [ offering ] = await TbdexHttpClient.getOfferings({ pfiDid: PFI_DID.uri })
+const [offering] = await TbdexHttpClient.getOfferings({ pfiDid: PFI_DID.uri });
 
 //
 //
@@ -28,56 +28,55 @@ const [ offering ] = await TbdexHttpClient.getOfferings({ pfiDid: PFI_DID.uri })
 //    npm run seed-offerings to seed the PFI with the issuer DID.
 //
 // This means that the PFI will trust SanctionsCredentials issued by this faux issuer.
-const issuer: BearerDid = await createOrLoadDid('issuer.json')
-console.log('issuer did:', issuer.uri)
-
+const issuer: BearerDid = await createOrLoadDid("issuer.json");
+console.log("issuer did:", issuer.uri);
 
 //
 //
 // Create a did for Alice, who is the customer of the PFI in this case.
-const alice = await createOrLoadDid('alice.json')
-console.log('alice did:', alice.uri)
+const alice = await createOrLoadDid("alice.json");
+console.log("alice did:", alice.uri);
 
 //
 //
 // Create a sanctions credential so that the PFI knows that Alice is legit.
 // This is normally done by a third party.
 const vc = await VerifiableCredential.create({
-  type    : 'SanctionCredential',
-  issuer  : issuer.uri,
-  subject : alice.uri,
-  data    : {
-    'beep': 'boop'
-  }
-})
-const vcJwt = await vc.sign({ did: issuer })
+  type: "SanctionCredential",
+  issuer: issuer.uri,
+  subject: alice.uri,
+  data: {
+    beep: "boop",
+  },
+});
+const vcJwt = await vc.sign({ did: issuer });
 
 //
 //
 // And here we go with tbdex-protocol!
 const rfq = Rfq.create({
-  metadata: { from: alice.uri, to: PFI_DID.uri },
+  metadata: { from: alice.uri, to: PFI_DID.uri, protocol: "1.0" },
   data: {
     offeringId: offering.id,
-    payinAmount: '100.00',
-    payinMethod: {
-      kind: 'USD_LEDGER',
-      paymentDetails: {}
+    payin: {
+      kind: "USD_LEDGER",
+      amount: "100.00",
+      paymentDetails: {},
     },
-    payoutMethod: {
-      kind: 'BANK_FIRSTBANK',
+    payout: {
+      kind: "BANK_FIRSTBANK",
       paymentDetails: {
-        accountNumber: '0x1234567890',
-        reason: 'I got kids'
-      }
+        accountNumber: "0x1234567890",
+        reason: "I got kids",
+      },
     },
-    claims: [vcJwt]
-  }
-})
+    claims: [vcJwt],
+  },
+});
 
-await rfq.sign(alice)
+await rfq.sign(alice);
 
-await TbdexHttpClient.sendMessage({ message: rfq })
+await TbdexHttpClient.createExchange(rfq);
 
 //
 //
@@ -86,7 +85,7 @@ await TbdexHttpClient.sendMessage({ message: rfq })
 const exchanges = await TbdexHttpClient.getExchanges({
   pfiDid: PFI_DID.uri,
   did: alice,
-  filter: { id: rfq.exchangeId }
-})
+  filter: { id: rfq.exchangeId },
+});
 
-console.log('exchanges', JSON.stringify(exchanges, null, 2))
+console.log("exchanges", JSON.stringify(exchanges, null, 2));
