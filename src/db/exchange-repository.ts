@@ -28,30 +28,24 @@ class _ExchangeRepository implements ExchangesApi {
   async getExchanges(opts?: {
     filter: GetExchangesFilter;
   }): Promise<Exchange[]> {
+    return [];
+
     // TODO: try out GROUP BY! would do it now, just unsure what the return structure looks like
+    console.log("I was called.");
     const exchangeIds = opts.filter.id?.length ? opts.filter.id : [];
 
     if (exchangeIds.length == 0) {
+      console.log("I said i don't have anything passed o");
       return await this.getAllExchanges();
     }
 
     const exchanges: Exchange[] = [];
-    // for (let id of exchangeIds) {
-    //   console.log("calling id", id);
-    // TODO: handle error property
-    // try {
-    //   const exchange = await this.getExchange({ id });
-    //   if (exchange) exchanges.push(exchange);
-    //   else console.error(`Could not find exchange with exchangeId ${id}`);
-    // } catch (err) {
-    //   console.error(err);
-    // }
-    // }
 
     if (opts.filter.id) {
       // filter has `id` and `from`
-
+      console.log("now we filter");
       for (const id of opts.filter.id) {
+        console.log("looping.");
         const exchange = this.exchangeMessagesMap.get(id);
         if (exchange?.rfq?.from === opts.filter.from) {
           exchanges.push(exchange);
@@ -59,6 +53,7 @@ class _ExchangeRepository implements ExchangesApi {
       }
     } else {
       // filter only has `from`
+      console.log("we skipped filter");
       this.exchangeMessagesMap.forEach((exchange, _id) => {
         // You definitely shouldn't use InMemoryExchangesApi in production.
         // This will get really slow
@@ -67,6 +62,8 @@ class _ExchangeRepository implements ExchangesApi {
         }
       });
     }
+
+    console.log("I'm about to return");
 
     return exchanges;
   }

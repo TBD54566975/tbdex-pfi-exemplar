@@ -62,7 +62,12 @@ const rfq = Rfq.create({
 
 await rfq.sign(alice);
 
-await TbdexHttpClient.createExchange(rfq, { replyTo: alice.uri });
+try {
+  await TbdexHttpClient.createExchange(rfq, { replyTo: alice.uri });
+} catch (error) {
+  console.log("Can't create:", error);
+}
+// await TbdexHttpClient.createExchange(rfq, { replyTo: alice.uri });
 console.log("sent RFQ: ", JSON.stringify(rfq, null, 2));
 
 //
