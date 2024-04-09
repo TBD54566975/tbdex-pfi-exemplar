@@ -55,7 +55,7 @@ const vcJwt = await vc.sign({ did: issuer })
 //
 // And here we go with tbdex-protocol!
 const rfq = Rfq.create({
-  metadata: { from: alice.uri, to: PFI_DID.uri, protocol: '1.0' },
+  metadata: { from: alice.uri, to: PFI_DID.uri },
   data: {
     offeringId: offering.id,
     payin: {
