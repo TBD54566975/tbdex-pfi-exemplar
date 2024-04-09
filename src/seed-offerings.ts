@@ -1,73 +1,73 @@
-import "./polyfills.js";
+import './polyfills.js'
 
-import { Postgres, OfferingRepository } from "./db/index.js";
-import { Offering } from "@tbdex/http-server";
-import { config } from "./config.js";
+import { Postgres, OfferingRepository } from './db/index.js'
+import { Offering } from '@tbdex/http-server'
+import { config } from './config.js'
 
-await Postgres.connect();
+await Postgres.connect()
 // await Postgres.ping()
-await Postgres.clear();
+await Postgres.clear()
 
 const offering = Offering.create({
-  metadata: { from: config.pfiDid.uri, protocol: "1.0" },
+  metadata: { from: config.pfiDid.uri },
   data: {
-    description: "fake offering 1",
-    payoutUnitsPerPayinUnit: "0.0069", // ex. we send 100 dollars, so that means 14550.00 KES
+    description: 'fake offering 1',
+    payoutUnitsPerPayinUnit: '0.0069', // ex. we send 100 dollars, so that means 14550.00 KES
     payin: {
-      currencyCode: "USD",
+      currencyCode: 'USD',
       methods: [
         {
-          kind: "USD_LEDGER",
+          kind: 'USD_LEDGER',
           requiredPaymentDetails: {},
         },
       ],
     },
     payout: {
-      currencyCode: "KES",
+      currencyCode: 'KES',
       methods: [
         {
-          kind: "MOMO_MPESA",
+          kind: 'MOMO_MPESA',
           requiredPaymentDetails: {
-            $schema: "http://json-schema.org/draft-07/schema#",
-            title: "Mobile Money Required Payment Details",
-            type: "object",
-            required: ["phoneNumber", "reason"],
+            $schema: 'http://json-schema.org/draft-07/schema#',
+            title: 'Mobile Money Required Payment Details',
+            type: 'object',
+            required: ['phoneNumber', 'reason'],
             additionalProperties: false,
             properties: {
               phoneNumber: {
-                title: "Mobile money phone number",
-                description: "Phone number of the Mobile Money account",
-                type: "string",
+                title: 'Mobile money phone number',
+                description: 'Phone number of the Mobile Money account',
+                type: 'string',
               },
               reason: {
-                title: "Reason for sending",
+                title: 'Reason for sending',
                 description:
-                  "To abide by the travel rules and financial reporting requirements, the reason for sending money",
-                type: "string",
+                  'To abide by the travel rules and financial reporting requirements, the reason for sending money',
+                type: 'string',
               },
             },
           },
           estimatedSettlementTime: 10, // seconds
         },
         {
-          kind: "BANK_FIRSTBANK",
+          kind: 'BANK_FIRSTBANK',
           requiredPaymentDetails: {
-            $schema: "http://json-schema.org/draft-07/schema#",
-            title: "Bank Transfer Required Payment Details",
-            type: "object",
-            required: ["accountNumber", "reason"],
+            $schema: 'http://json-schema.org/draft-07/schema#',
+            title: 'Bank Transfer Required Payment Details',
+            type: 'object',
+            required: ['accountNumber', 'reason'],
             additionalProperties: false,
             properties: {
               accountNumber: {
-                title: "Bank account number",
-                description: "Bank account of the recipient's bank account",
-                type: "string",
+                title: 'Bank account number',
+                description: 'Bank account of the recipient\'s bank account',
+                type: 'string',
               },
               reason: {
-                title: "Reason for sending",
+                title: 'Reason for sending',
                 description:
-                  "To abide by the travel rules and financial reporting requirements, the reason for sending money",
-                type: "string",
+                  'To abide by the travel rules and financial reporting requirements, the reason for sending money',
+                type: 'string',
               },
             },
           },
@@ -77,24 +77,24 @@ const offering = Offering.create({
     },
 
     requiredClaims: {
-      id: "7ce4004c-3c38-4853-968b-e411bafcd945",
+      id: '7ce4004c-3c38-4853-968b-e411bafcd945',
       input_descriptors: [
         {
-          id: "bbdb9b7c-5754-4f46-b63b-590bada959e0",
+          id: 'bbdb9b7c-5754-4f46-b63b-590bada959e0',
           constraints: {
             fields: [
               {
-                path: ["$.type[*]"],
+                path: ['$.type[*]'],
                 filter: {
-                  type: "string",
-                  pattern: "^SanctionCredential$",
+                  type: 'string',
+                  pattern: '^SanctionCredential$',
                 },
               },
               {
                 path: ['$.issuer'],
                 filter: {
                   type: 'string',
-                  const: 'did:dht:5m3ksgmrnc163dsa3iymh5dfk3sjcu39om7q94guab9imanpn1py'
+                  const: 'did:dht:ssmuk4ie1yq9anwmt5egdmq7imjycixx5t3up18a64ccitwn5y1y'
                 }
               }
             ],
@@ -103,7 +103,7 @@ const offering = Offering.create({
       ],
     },
   },
-});
+})
 
-await offering.sign(config.pfiDid);
-await OfferingRepository.create(offering);
+await offering.sign(config.pfiDid)
+await OfferingRepository.create(offering)

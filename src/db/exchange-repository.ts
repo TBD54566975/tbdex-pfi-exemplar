@@ -53,24 +53,24 @@ class _ExchangeRepository implements ExchangesApi {
   }
 
   private async composeMessages(results: { message: MessageModel }[]): Promise<Exchange[]> {
-    const exchangeMap: { [key: string]: Exchange } = {}
+    const exchangeMap: Map<string, Exchange> = new Map()
 
     for (let result of results) {
       const message = await Parser.parseMessage(result.message)
       const exchangeId = message.metadata.exchangeId
 
-      if (!exchangeMap[exchangeId]) {
-        exchangeMap[exchangeId] = new Exchange()
+      if (!exchangeMap.get(exchangeId)) {
+        exchangeMap.set(exchangeId, new Exchange())
       }
 
       try {
-        exchangeMap[exchangeId].addNextMessage(message)
+        exchangeMap.get(exchangeId).addNextMessage(message)
       } catch (error) {
         console.error(`Error adding message to exchange ${exchangeId}:`, error)
       }
     }
 
-    return Object.values(exchangeMap)
+    return Array.from(exchangeMap.values())
   }
 
   async getRfq(opts: { exchangeId: string }): Promise<Rfq> {
