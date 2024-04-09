@@ -8,6 +8,8 @@ import {
 } from '@tbdex/http-client'
 import { createOrLoadDid } from './utils.js'
 import { BearerDid } from '@web5/dids'
+import { ErrorDetail, Message, Parser, RequestError, ResponseError } from '@tbdex/http-server'
+import queryString from 'query-string'
 
 //
 // get the PFI did from the command line parameter
@@ -74,7 +76,7 @@ let quote
 
 //Wait for Quote message to appear in the exchange
 while (!quote) {
-  const exchange = await TbdexHttpClient.getExchange({
+  const exchange = await getExchange({
     pfiDid: rfq.metadata.to,
     did: alice,
     exchangeId: rfq.exchangeId
@@ -92,7 +94,7 @@ while (!quote) {
 //
 // All interaction with the PFI happens in the context of an exchange.
 // This is where for example a quote would show up in result to an RFQ:
-const exchanges = await TbdexHttpClient.getExchanges({
+const exchanges = await getExchanges({
   pfiDid: pfiDid,
   did: alice,
   filter: { id: rfq.exchangeId },
@@ -133,7 +135,7 @@ for (const message of exchange) {
 async function pollForStatus(order: Order, pfiDid: string, did: BearerDid) {
   let close: Close
   while (!close) {
-    const exchanges = await TbdexHttpClient.getExchanges({
+    const exchanges = await getExchanges({
       pfiDid: pfiDid,
       did: did,
       filter: { id: order.exchangeId },
@@ -154,4 +156,105 @@ async function pollForStatus(order: Order, pfiDid: string, did: BearerDid) {
       }
     }
   }
+}
+
+
+
+async function getExchange(opts: { pfiDid: string; exchangeId: string; did: any }): Promise<Message[]> {
+  const { pfiDid, exchangeId, did } = opts
+
+  const pfiServiceEndpoint = await TbdexHttpClient.getPfiServiceEndpoint(pfiDid)
+  const apiRoute = `${pfiServiceEndpoint}/exchanges/${exchangeId}`
+  const requestToken = await TbdexHttpClient.generateRequestToken({ requesterDid: did, pfiDid })
+
+  let response: Response
+  try {
+    response = await fetch(apiRoute, {
+      headers: {
+        authorization: `Bearer ${requestToken}`
+      }
+    })
+  } catch (e) {
+    throw new RequestError({ message: `Failed to get exchange from ${pfiDid}`, recipientDid: pfiDid, url: apiRoute, cause: e })
+  }
+
+  const messages: Message[] = []
+
+  if (!response.ok) {
+    const errorDetails = await response.json() as ErrorDetail[]
+    throw new ResponseError({ statusCode: response.status, details: errorDetails, recipientDid: pfiDid, url: apiRoute })
+  }
+
+  const responseBody = await response.json()
+  const exchangeData = responseBody.data
+  for (let jsonMessage of [exchangeData.rfq, exchangeData.quote, ...exchangeData.orderstatus]) {
+    if (jsonMessage) {
+      const message = await Parser.parseMessage(jsonMessage)
+      messages.push(message)
+    }
+  }
+
+  return messages
+}
+
+//
+//
+//
+//
+//
+//
+//
+//
+/** IMPORTANT the following code is to patch over: https://github.com/TBD54566975/tbdex-js/issues/236  */
+//
+//
+//
+//
+//
+//
+//
+//
+
+async function getExchanges(opts: { pfiDid: string; filter?: { id: string | string[] }; did: any }): Promise<Message[][]> {
+
+  const { pfiDid, filter, did } = opts
+
+  const pfiServiceEndpoint = await TbdexHttpClient.getPfiServiceEndpoint(pfiDid)
+  const queryParams = filter ? `?${queryString.stringify(filter)}` : ''
+  const apiRoute = `${pfiServiceEndpoint}/exchanges${queryParams}`
+  const requestToken = await TbdexHttpClient.generateRequestToken({ requesterDid: did, pfiDid })
+
+  let response: Response
+  try {
+    response = await fetch(apiRoute, {
+      headers: {
+        authorization: `Bearer ${requestToken}`
+      }
+    })
+  } catch (e) {
+    throw new RequestError({ message: `Failed to get exchanges from ${pfiDid}`, recipientDid: pfiDid, url: apiRoute, cause: e })
+  }
+
+  const exchanges: Message[][] = []
+
+  if (!response.ok) {
+    const errorDetails = await response.json() as ErrorDetail[]
+    throw new ResponseError({ statusCode: response.status, details: errorDetails, recipientDid: pfiDid, url: apiRoute })
+  }
+
+  const responseBody = await response.json() as { data: any[] }
+  for (let exchangeData of responseBody.data) {
+    const exchange: Message[] = []
+
+    for (let jsonMessage of [exchangeData.rfq, exchangeData.quote, ...exchangeData.orderstatus]) {
+      if (jsonMessage) {
+        const message = await Parser.parseMessage(jsonMessage)
+        exchange.push(message)
+      }
+    }
+
+    exchanges.push(exchange)
+  }
+
+  return exchanges
 }
