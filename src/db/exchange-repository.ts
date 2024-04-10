@@ -199,7 +199,8 @@ class _ExchangeRepository implements ExchangesApi {
           exchangeId: message.exchangeId
         },
         data: {
-          reason: 'Order fulfilled'
+          reason: 'Order fulfilled',
+          success: true
         }
       })
       await close.sign(config.pfiDid)
