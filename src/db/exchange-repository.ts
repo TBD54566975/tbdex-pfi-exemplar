@@ -1,11 +1,11 @@
-import { Message, Close, Order, OrderStatus, Quote, ExchangesApi, Rfq, Parser } from '@tbdex/http-server'
+import { Message, Close, Order, OrderStatus, Quote, ExchangesApi, Rfq, Parser, Exchange } from '@tbdex/http-server'
 import type { MessageModel, MessageKind, GetExchangesFilter } from '@tbdex/http-server'
 import { Postgres } from './postgres.js'
 import { config } from '../config.js'
 
 class _ExchangeRepository implements ExchangesApi {
 
-  async getExchanges(opts: { filter: GetExchangesFilter }): Promise<Message[][]> {
+  async getExchanges(opts: { filter: GetExchangesFilter }): Promise<Exchange[]> {
     // TODO: try out GROUP BY! would do it now, just unsure what the return structure looks like
     const exchangeIds = opts.filter.id?.length ? opts.filter.id : []
 
@@ -13,13 +13,13 @@ class _ExchangeRepository implements ExchangesApi {
       return await this.getAllExchanges()
     }
 
-    const exchanges: Message[][] = []
+    const exchanges: Exchange[] = []
     for (let id of exchangeIds) {
       console.log('calling id', id)
       // TODO: handle error property
       try {
         const exchange = await this.getExchange({ id })
-        if (exchange.length) exchanges.push(exchange)
+        if (exchange.messages.length) exchanges.push(exchange)
         else console.error(`Could not find exchange with exchangeId ${id}`)
       } catch (err) {
         console.error(err)
@@ -29,7 +29,7 @@ class _ExchangeRepository implements ExchangesApi {
     return exchanges
   }
 
-  async getAllExchanges(): Promise<Message[][]> {
+  async getAllExchanges(): Promise<Exchange[]> {
     const results = await Postgres.client.selectFrom('exchange')
       .select(['message'])
       .orderBy('createdat', 'asc')
@@ -38,7 +38,7 @@ class _ExchangeRepository implements ExchangesApi {
     return this.composeMessages(results)
   }
 
-  async getExchange(opts: { id: string }): Promise<Message[]> {
+  async getExchange(opts: { id: string }): Promise<Exchange | undefined> {
     const results = await Postgres.client.selectFrom('exchange')
       .select(['message'])
       .where(eb => eb.and({
@@ -49,23 +49,28 @@ class _ExchangeRepository implements ExchangesApi {
 
     const messages = await this.composeMessages(results)
 
-    return messages[0] ?? []
+    return messages[0] ?? undefined
   }
 
-  private async composeMessages(results: { message: MessageModel }[]): Promise<Message[][]> {
-    const exchangeIdsToMessages: {[key: string]: Message[]} = {}
+  private async composeMessages(results: { message: MessageModel }[]): Promise<Exchange[]> {
+    const exchangeMap: Map<string, Exchange> = new Map()
 
     for (let result of results) {
       const message = await Parser.parseMessage(result.message)
       const exchangeId = message.metadata.exchangeId
-      if (exchangeIdsToMessages[exchangeId]) {
-        exchangeIdsToMessages[exchangeId].push(message)
-      } else {
-        exchangeIdsToMessages[exchangeId] = [message]
+
+      if (!exchangeMap.get(exchangeId)) {
+        exchangeMap.set(exchangeId, new Exchange())
+      }
+
+      try {
+        exchangeMap.get(exchangeId).addNextMessage(message)
+      } catch (error) {
+        console.error(`Error adding message to exchange ${exchangeId}:`, error)
       }
     }
 
-    return Object.values(exchangeIdsToMessages)
+    return Array.from(exchangeMap.values())
   }
 
   async getRfq(opts: { exchangeId: string }): Promise<Rfq> {
@@ -205,4 +210,4 @@ class _ExchangeRepository implements ExchangesApi {
 
 const aliceMessageKinds = new Set(['rfq', 'order'])
 
-export const ExchangeRespository = new _ExchangeRepository()
+export const ExchangeRepository = new _ExchangeRepository()

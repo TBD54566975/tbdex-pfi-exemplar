@@ -1,4 +1,11 @@
-import { TbdexHttpClient, Rfq, Quote, Order, OrderStatus, Close } from '@tbdex/http-client'
+import {
+  TbdexHttpClient,
+  Rfq,
+  Quote,
+  Order,
+  OrderStatus,
+  Close,
+} from '@tbdex/http-client'
 import { createOrLoadDid } from './utils.js'
 import { BearerDid } from '@web5/dids'
 
@@ -11,7 +18,6 @@ if (!pfiDid) {
   process.exit(1)
 }
 
-
 const signedCredential = process.argv[3]
 if (!signedCredential) {
   console.error('Please put in the signed credential as the second parameter')
@@ -21,9 +27,8 @@ if (!signedCredential) {
 //
 //  Connect to the PFI and get the list of offerings (offerings are resources - anyone can ask for them)
 //
-const [ offering ] = await TbdexHttpClient.getOfferings({ pfiDid: pfiDid })
+const [offering] = await TbdexHttpClient.getOfferings({ pfiDid: pfiDid })
 console.log('got offering:', JSON.stringify(offering, null, 2))
-
 
 //
 // Load alice's private key to sign RFQ
@@ -39,43 +44,63 @@ const rfq = Rfq.create({
   metadata: { from: alice.uri, to: pfiDid },
   data: {
     offeringId: offering.id,
-    payinAmount: '100.00',
-    payinMethod: {
+    payin: {
       kind: 'USD_LEDGER',
-      paymentDetails: {}
+      amount: '100.00',
+      paymentDetails: {},
     },
-    payoutMethod: {
+    payout: {
       kind: 'BANK_FIRSTBANK',
       paymentDetails: {
         accountNumber: '0x1234567890',
-        reason: 'I got kids'
-      }
+        reason: 'I got kids',
+      },
     },
-    claims: [signedCredential]
-  }
+    claims: [signedCredential],
+  },
 })
 
 await rfq.sign(alice)
 
-await TbdexHttpClient.sendMessage({ message: rfq, replyTo: alice.uri })
+try {
+  await TbdexHttpClient.createExchange(rfq, { replyTo: alice.uri })
+} catch (error) {
+  console.log('Can\'t create:', error)
+}
 console.log('sent RFQ: ', JSON.stringify(rfq, null, 2))
+
+let quote
+
+//Wait for Quote message to appear in the exchange
+while (!quote) {
+  const exchange = await TbdexHttpClient.getExchange({
+    pfiDid: pfiDid,
+    did: alice,
+    exchangeId: rfq.exchangeId
+  })
+
+  quote = exchange.find(msg => msg instanceof Quote)
+
+  if (!quote) {
+    // Wait 2 seconds before making another request
+    await new Promise(resolve => setTimeout(resolve, 2000))
+  }
+}
 
 //
 //
 // All interaction with the PFI happens in the context of an exchange.
 // This is where for example a quote would show up in result to an RFQ:
-const exchanges = await TbdexHttpClient.getExchanges({
+const exchange = await TbdexHttpClient.getExchange({
   pfiDid: pfiDid,
   did: alice,
-  filter: { id: rfq.exchangeId }
+  exchangeId: rfq.exchangeId
 })
 
-
-console.log('got exchanges:', JSON.stringify(exchanges, null, 2))
+console.log('got exchange:', JSON.stringify(exchange, null, 2))
 //
 // Now lets get the quote out of the returned exchange
 //
-const [ exchange ] = exchanges
 
 for (const message of exchange) {
   if (message instanceof Quote) {
@@ -84,10 +109,14 @@ for (const message of exchange) {
 
     // Place an order against that quote:
     const order = Order.create({
-      metadata: { from: alice.uri, to: pfiDid, exchangeId: quote.exchangeId },
+      metadata: {
+        from: alice.uri,
+        to: pfiDid,
+        exchangeId: quote.exchangeId
+      },
     })
     await order.sign(alice)
-    await TbdexHttpClient.sendMessage({ message: order })
+    await TbdexHttpClient.submitOrder(order)
     console.log('Sent order: ', JSON.stringify(order, null, 2))
 
     // poll for order status updates
@@ -101,21 +130,18 @@ for (const message of exchange) {
 async function pollForStatus(order: Order, pfiDid: string, did: BearerDid) {
   let close: Close
   while (!close) {
-    const exchanges = await TbdexHttpClient.getExchanges({
+    const exchange = await TbdexHttpClient.getExchange({
       pfiDid: pfiDid,
       did: did,
-      filter: { id: order.exchangeId }
+      exchangeId: order.exchangeId
     })
-
-    const [ exchange ] = exchanges
 
     for (const message of exchange) {
       if (message instanceof OrderStatus) {
         console.log('we got a new order status')
         const orderStatus = message as OrderStatus
         console.log('orderStatus', JSON.stringify(orderStatus, null, 2))
-      }
-      else if(message instanceof Close) {
+      } else if (message instanceof Close) {
         console.log('we have a close message')
         close = message as Close
         console.log('close', JSON.stringify(close, null, 2))
@@ -124,6 +150,3 @@ async function pollForStatus(order: Order, pfiDid: string, did: BearerDid) {
     }
   }
 }
-
-
-

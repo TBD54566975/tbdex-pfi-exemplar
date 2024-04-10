@@ -5,17 +5,22 @@ import type { Rfq, Order, Close } from '@tbdex/http-server'
 
 import log from './logger.js'
 import { config } from './config.js'
-import { Postgres, ExchangeRespository, OfferingRepository } from './db/index.js'
+import {
+  Postgres,
+  ExchangeRepository,
+  OfferingRepository,
+} from './db/index.js'
 import { HttpServerShutdownHandler } from './http-shutdown-handler.js'
 import { TbdexHttpServer } from '@tbdex/http-server'
 
-
 process.on('unhandledRejection', (reason: any, promise) => {
-  log.error(`Unhandled promise rejection. Reason: ${reason}. Promise: ${JSON.stringify(promise)}. Stack: ${reason.stack}`)
+  log.error(
+    `Unhandled promise rejection. Reason: ${reason}. Promise: ${JSON.stringify(promise)}. Stack: ${reason.stack}`,
+  )
 })
 
-process.on('uncaughtException', err => {
-  log.error('Uncaught exception:', (err.stack || err))
+process.on('uncaughtException', (err) => {
+  log.error('Uncaught exception:', err.stack || err)
 })
 
 // triggered by ctrl+c with no traps in between
@@ -33,21 +38,21 @@ process.on('SIGTERM', async () => {
 })
 
 const httpApi = new TbdexHttpServer({
-  exchangesApi: ExchangeRespository,
+  exchangesApi: ExchangeRepository,
   offeringsApi: OfferingRepository,
-  pfiDid: config.pfiDid.uri
+  pfiDid: config.pfiDid.uri,
 })
 
-httpApi.onSubmitRfq(async (ctx, rfq) => {
-  await ExchangeRespository.addMessage({ message: rfq as Rfq })
+httpApi.onCreateExchange(async (ctx, rfq) => {
+  await ExchangeRepository.addMessage({ message: rfq as Rfq })
 })
 
 httpApi.onSubmitOrder(async (ctx, order) => {
-  await ExchangeRespository.addMessage({ message: order as Order })
+  await ExchangeRepository.addMessage({ message: order as Order })
 })
 
 httpApi.onSubmitClose(async (ctx, close) => {
-  await ExchangeRespository.addMessage({ message: close as Close })
+  await ExchangeRepository.addMessage({ message: close as Close })
 })
 
 const server = httpApi.listen(config.port, () => {
@@ -57,11 +62,12 @@ const server = httpApi.listen(config.port, () => {
 console.log('PFI DID FROM SERVER: ', config.pfiDid.uri)
 
 httpApi.api.get('/', (req, res) => {
-  res.send('Please use the tbdex protocol to communicate with this server or a suitable library: https://github.com/TBD54566975/tbdex-protocol')
+  res.send(
+    'Please use the tbdex protocol to communicate with this server or a suitable library: https://github.com/TBD54566975/tbdex-protocol',
+  )
 })
 
 const httpServerShutdownHandler = new HttpServerShutdownHandler(server)
-
 
 function gracefulShutdown() {
   httpServerShutdownHandler.stop(async () => {

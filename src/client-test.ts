@@ -18,7 +18,7 @@ console.log('PFI DID FROM CLIENT:', PFI_DID.uri)
 //
 //  Connect to the PFI and get the list of offerings (offerings are resources - anyone can ask for them)
 //
-const [ offering ] = await TbdexHttpClient.getOfferings({ pfiDid: PFI_DID.uri })
+const [offering] = await TbdexHttpClient.getOfferings({ pfiDid: PFI_DID.uri })
 
 //
 //
@@ -31,7 +31,6 @@ const [ offering ] = await TbdexHttpClient.getOfferings({ pfiDid: PFI_DID.uri })
 const issuer: BearerDid = await createOrLoadDid('issuer.json')
 console.log('issuer did:', issuer.uri)
 
-
 //
 //
 // Create a did for Alice, who is the customer of the PFI in this case.
@@ -43,12 +42,12 @@ console.log('alice did:', alice.uri)
 // Create a sanctions credential so that the PFI knows that Alice is legit.
 // This is normally done by a third party.
 const vc = await VerifiableCredential.create({
-  type    : 'SanctionCredential',
-  issuer  : issuer.uri,
-  subject : alice.uri,
-  data    : {
-    'beep': 'boop'
-  }
+  type: 'SanctionCredential',
+  issuer: issuer.uri,
+  subject: alice.uri,
+  data: {
+    beep: 'boop',
+  },
 })
 const vcJwt = await vc.sign({ did: issuer })
 
@@ -59,25 +58,25 @@ const rfq = Rfq.create({
   metadata: { from: alice.uri, to: PFI_DID.uri },
   data: {
     offeringId: offering.id,
-    payinAmount: '100.00',
-    payinMethod: {
+    payin: {
       kind: 'USD_LEDGER',
-      paymentDetails: {}
+      amount: '100.00',
+      paymentDetails: {},
     },
-    payoutMethod: {
+    payout: {
       kind: 'BANK_FIRSTBANK',
       paymentDetails: {
         accountNumber: '0x1234567890',
-        reason: 'I got kids'
-      }
+        reason: 'I got kids',
+      },
     },
-    claims: [vcJwt]
-  }
+    claims: [vcJwt],
+  },
 })
 
 await rfq.sign(alice)
 
-await TbdexHttpClient.sendMessage({ message: rfq })
+await TbdexHttpClient.createExchange(rfq)
 
 //
 //
@@ -86,7 +85,7 @@ await TbdexHttpClient.sendMessage({ message: rfq })
 const exchanges = await TbdexHttpClient.getExchanges({
   pfiDid: PFI_DID.uri,
   did: alice,
-  filter: { id: rfq.exchangeId }
+  filter: { id: rfq.exchangeId },
 })
 
 console.log('exchanges', JSON.stringify(exchanges, null, 2))
