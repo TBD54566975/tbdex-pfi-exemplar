@@ -12,6 +12,23 @@ import {
 } from './db/index.js'
 import { HttpServerShutdownHandler } from './http-shutdown-handler.js'
 import { TbdexHttpServer } from '@tbdex/http-server'
+import { DidDht } from '@web5/dids'
+
+
+
+/**
+ * Republish the server DID to ensure it is fresh
+ */
+async function republish() {
+  await DidDht.publish({'did': config.pfiDid});
+  console.log("republished PFI DID")
+}
+republish();
+
+// and it may be a good idea to republish the server DID every hour
+setInterval(republish, 3600000);
+
+
 
 process.on('unhandledRejection', (reason: any, promise) => {
   log.error(

@@ -6,7 +6,6 @@ import fs from 'node:fs'
 import 'dotenv/config'
 import { BearerDid, DidDht } from '@web5/dids'
 import { createOrLoadDid } from './example/utils.js'
-import { setInterval } from 'node:timers'
 
 export type Environment = 'local' | 'staging' | 'production'
 
@@ -50,12 +49,4 @@ if (!config.pfiDid) {
 }
 
 
-/**
- * Republish the PFI DID every hour
- */
-async function republish() {
-  await DidDht.publish({'did': config.pfiDid});
 
-}
-republish();
-setInterval(republish, 3600000);
