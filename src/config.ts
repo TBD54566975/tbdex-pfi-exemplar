@@ -43,6 +43,10 @@ if (!config.pfiDid) {
     services: [{ id: 'pfi', type: 'PFI', serviceEndpoint: config.host }]
   }})
 
+
   config.pfiDid = pfiDid
   fs.writeFileSync('pfi.json', JSON.stringify(config.pfiDid, null, 2))
 }
+
+
+
