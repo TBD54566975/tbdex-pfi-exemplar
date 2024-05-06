@@ -147,7 +147,7 @@ class _ExchangeRepository implements ExchangesApi {
           exchangeId: message.exchangeId
         },
         data: {
-          expiresAt: new Date(2024, 4, 1).toISOString(),
+          expiresAt: new Date(2054, 4, 1).toISOString(),
           payin: {
             currencyCode: 'BTC',
             amount: '1000.00'
