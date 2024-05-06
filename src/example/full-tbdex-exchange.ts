@@ -63,7 +63,7 @@ const rfq = Rfq.create({
 await rfq.sign(alice)
 
 try {
-  await TbdexHttpClient.createExchange(rfq, { replyTo: alice.uri })
+  await TbdexHttpClient.createExchange(rfq)
 } catch (error) {
   console.log('Can\'t create:', error)
 }
