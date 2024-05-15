@@ -1,5 +1,4 @@
 import './polyfills.js'
-import './seed-offerings.js'
 
 import type { Rfq, Order, Close } from '@tbdex/http-server'
 
@@ -15,6 +14,7 @@ import { TbdexHttpServer } from '@tbdex/http-server'
 import { DidDht } from '@web5/dids'
 
 
+await Postgres.connect()
 
 /**
  * Republish the server DID to ensure it is fresh
