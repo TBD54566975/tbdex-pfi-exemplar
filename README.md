@@ -78,6 +78,9 @@ based on your OS' package manager.
      `.env.example` contains all environment variables that you _can_ set.
 6. `npm run server` and ensure this is running
 
+> [!NOTE]
+> (optional) If you want to run this over a network, please set HOST environment to an appropriate name that clients can connect to, as this will be set in the PFIs did as a `serviceEndpoint` (otherwise it defaults to http://localhost:9000)
+
 ## Running end-to-end PFI tutorial
 In this tutorial we will set up an issuer to issue Sanction Check VCs, as well
 as create a customer called "Alice" to interact with the PFI server.
@@ -137,13 +140,12 @@ npm run server
 ### Step 7: Run a tbDEX exchange
 Run a tbDEX transaction (or exchange):
 
-Take the PFI DID string and the signed VC string (both long) and run:
 
 ```bash
 npm run example-e2e-exchange
 ```
 
-With the values from Step 5 and Step 6. You will see the server print out the
+You will see the server print out the
 interaction between the customer and the PFI. This will look up offers, ask for
 a quote, place an order, and finally check for status.
 
