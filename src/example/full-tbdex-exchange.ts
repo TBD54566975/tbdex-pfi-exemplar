@@ -8,21 +8,14 @@ import {
 } from '@tbdex/http-client'
 import { createOrLoadDid } from './utils.js'
 import { BearerDid } from '@web5/dids'
+import fs from 'fs'
 
-//
-// get the PFI did from the command line parameter
-//
-const pfiDid = process.argv[2]
-if (!pfiDid) {
-  console.error('Please put in the DID of the PFI as the first parameter')
-  process.exit(1)
-}
 
-const signedCredential = process.argv[3]
-if (!signedCredential) {
-  console.error('Please put in the signed credential as the second parameter')
-  process.exit(1)
-}
+// load pfiDid from pfiDid.txt
+const pfiDid = fs.readFileSync('pfiDid.txt', 'utf-8').trim()
+
+
+const signedCredential = fs.readFileSync('signedCredential.txt', 'utf-8').trim()
 
 //
 //  Connect to the PFI and get the list of offerings (offerings are resources - anyone can ask for them)

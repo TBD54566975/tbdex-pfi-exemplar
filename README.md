@@ -95,19 +95,14 @@ npm run example-create-issuer
 Creates a new VC issuer, which will be needed by the PFI.
 
 > [!NOTE]
->`issuer.json` stores the private info for the issuer
+>`issuer.json` stores the private key info for the issuer, `issuerDid.txt` has the public did which will be trusted by the PFI. 
 
 ### Step 3: Configure the PFI database with offerings and VC issuer
-Replace [these lines
-in](https://github.com/TBD54566975/tbdex-pfi-exemplar/blob/d192d294418d154f275d97e8c345d58a2bb06712/src/seed-offerings.ts#L87-L95)
-`seed-offerings.ts` with the appropriate issuer info.
-
-https://github.com/TBD54566975/tbdex-pfi-exemplar/blob/11bc1ede3d326259a2dae4fe23470e1a47303e4e/src/seed-offerings.ts#L87-L95
 
 ```bash
 npm run seed-offerings
 ```
-Prepares the PFI with the issuer DID and the offerings it will provide
+Prepares the PFI with the issuer DID and the offerings it will provide, and what issuer it will trust for the VC.
 
 ### Step 4: Create the identity for customer "Alice"
 ```bash
@@ -117,7 +112,7 @@ Create a new "customer" DID (customer is called Alice, think of it as her
 wallet). **Take note of her DID which will be used in the next step**.
 
 > [!NOTE]
-> Alice's private wallet info is stored in `alice.json`.
+> Alice's private wallet info is stored in `alice.json`, and her public DID is in `aliceDid.txt`
 
 ### Step 5: Issue a sanctions check VC to "Alice"
 Issue the credential to Alice, which ensures Alice is a non-sanctioned
@@ -125,7 +120,7 @@ individual. Use the DID from in Step 4. **Take note of the signed VC that is
 returned.**
 
 ```bash
-npm run example-issue-credential $customer_did
+npm run example-issue-credential
 ```
 
 ### Step 6: Run the PFI server
@@ -145,7 +140,7 @@ Run a tbDEX transaction (or exchange):
 Take the PFI DID string and the signed VC string (both long) and run:
 
 ```bash
-npm run example-e2e-exchange $pfi_server_did $signed_vc
+npm run example-e2e-exchange
 ```
 
 With the values from Step 5 and Step 6. You will see the server print out the
