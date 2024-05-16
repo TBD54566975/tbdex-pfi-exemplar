@@ -1,7 +1,7 @@
 import { BearerDid, DidDht, PortableDid } from '@web5/dids'
 import fs from 'fs/promises'
 
-export async function createOrLoadDid(filename: string): Promise<BearerDid> {
+export async function createOrLoadDid(filename: string, serviceEndpoint: string = 'http://localhost:9000'): Promise<BearerDid> {
 
   // Check if the file exists
   try {
@@ -19,7 +19,7 @@ export async function createOrLoadDid(filename: string): Promise<BearerDid> {
             {
               id: 'pfi',
               type: 'PFI',
-              serviceEndpoint: 'http://localhost:9000'
+              serviceEndpoint: serviceEndpoint
             }]
         }})
 
