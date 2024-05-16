@@ -8,9 +8,8 @@ WORKDIR /home/node/app
 COPY --chown=node:node . /home/node/app/
 
 # Install the application dependencies
-RUN npm install - g pnpm
-RUN pnpm install
-RUN pnpm build
+RUN npm i
+RUN npm run build
 
 # Download and install dbmate
 RUN curl -fsSL https://github.com/amacneil/dbmate/releases/download/v1.12.1/dbmate-linux-amd64 -o dbmate \

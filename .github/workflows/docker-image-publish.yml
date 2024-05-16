@@ -23,8 +23,7 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - dockerfile: ./Apps.Dockerfile
-            target: tbd-pfi-exemplar
+          - dockerfile: ./.Dockerfile
             image: ghcr.io/tbd54566975/tbd-developer-pfi-exemplar
 
     steps:
@@ -42,7 +41,7 @@ jobs:
         uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
         with:
           context: .
-          file: Apps.Dockerfile
+          file: .Dockerfile
           push: true
           target: ${{ matrix.target }}
           labels: ${{ steps.meta.outputs.labels }}
