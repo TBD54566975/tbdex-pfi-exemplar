@@ -57,12 +57,12 @@
     "lint:fix": "eslint . --ext .ts --fix",
     "seed-offerings": "npm run _start -- dist/seed-offerings.js",
     "server": "npm run _start -- dist/main.js",
-    "test": "rimraf dist/tests && npm run compile && node --test",
     "try": "npm run _debug -- dist/client-test.js",
     "docker:up": "docker-compose up -d",
     "docker:down": "docker-compose down",
     "docker:logs": "docker-compose logs -f",
     "docker:build": "docker-compose build",
+    "test": "npm run example-create-issuer && npm run seed-offerings && npm run example-create-customer && npm run example-issue-credential && npm run example-e2e-exchange",
     "docker:down-wipe": "docker-compose down -v"
   }
 }

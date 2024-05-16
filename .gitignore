@@ -6,3 +6,4 @@ alice.json
 issuer.json
 pfi.json
 DATASTORE
+*.txt
