@@ -16,4 +16,9 @@ RUN curl -fsSL https://github.com/amacneil/dbmate/releases/download/v1.12.1/dbma
     && chmod +x dbmate \
     && mv dbmate /usr/local/bin
 
-COPY --chown=node:node --from=base /home/node/app/site/build /usr/share/nginx/html/
+# TODO: maybe remove
+# COPY --chown=node:node --from=base /home/node/app/site/build /usr/share/nginx/html/
+
+WORKDIR /home/node/app/site/build
+EXPOSE 9000
+CMD [ "npm", "server" ]

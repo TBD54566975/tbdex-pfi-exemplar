@@ -15,27 +15,25 @@ services:
       timeout: 5s
       retries: 5
 
-  node:
-    image: node:20.4.0
-    working_dir: /app
-    volumes:
-      - .:/app
-    depends_on:
-      postgres:
-        condition: service_healthy
+  pfi-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - '9000:9000'
     environment:
-      DATABASE_URL: postgres://postgres:tbd@postgres:5432/mockpfi
-    command: >
-      sh -c "
-        npm install &&
-        curl -fsSL https://github.com/amacneil/dbmate/releases/download/v1.12.1/dbmate-linux-amd64 -o dbmate &&
-        chmod +x dbmate &&
-        mv dbmate /usr/local/bin &&
-        ./db/scripts/migrate &&
-        npm run seed-offerings &&
-        npm run server &
-        SERVER_PID=$! &&
-        sleep 5 &&
-        npm run test &&
-        kill $SERVER_PID
-      "
+      NODE_ENV: production
+      # environment info
+      ENV: production
+      LOG_LEVEL: info
+      HOST: localhost
+      PORT: 9000
+      
+      # DB info
+      SEC_DB_HOST: localhost
+      SEC_DB_PORT: 5432
+      SEC_DB_USER: postgres
+      SEC_DB_PASSWORD: tbd
+      SEC_DB_NAME: mockpfi
+    depends_on:
+      - postgresdb
