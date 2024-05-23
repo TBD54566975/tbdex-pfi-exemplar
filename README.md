@@ -133,10 +133,6 @@ Run the server (or restart it) in another terminal window:
 npm run server
 ```
 
-> [!NOTE]
-> The server prints out the DID for the server after it starts, take a copy
-> of this for the next step.
-
 ### Step 7: Run a tbDEX exchange
 Run a tbDEX transaction (or exchange):
 
@@ -181,9 +177,6 @@ for the client to be able to make a request for a quote.
 
 You also should use a non-ephemeral DID (using the `env` vars config as
 described above).
-
-
-TODO: more content needed here...
 
 
 ## DB stuff
