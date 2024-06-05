@@ -276,8 +276,8 @@ async function main() {
       },
     })
 
-    //await offering1.sign(config.pfiDid)
-    //await OfferingRepository.create(offering1)
+    await offering1.sign(config.pfiDid)
+    await OfferingRepository.create(offering1)
 
     await offering2.sign(config.pfiDid)
     await OfferingRepository.create(offering2)
