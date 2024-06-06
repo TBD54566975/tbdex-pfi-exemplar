@@ -23,11 +23,14 @@ const signedCredential = fs.readFileSync('signedCredential.txt', 'utf-8').trim()
 const [offering] = await TbdexHttpClient.getOfferings({ pfiDid: pfiDid })
 console.log('got offering:', JSON.stringify(offering, null, 2))
 
+
 //
 // Load alice's private key to sign RFQ
 //
 const alice = await createOrLoadDid('alice.json')
 
+const [balances] = await TbdexHttpClient.getBalances({ pfiDid: pfiDid, did: alice })
+console.log('got balances:', JSON.stringify(balances, null, 2))
 //
 // And here we go with tbdex-protocol!
 //
