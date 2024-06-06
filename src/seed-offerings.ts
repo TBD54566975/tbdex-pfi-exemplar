@@ -136,25 +136,6 @@ async function main() {
             },
           ],
         },
-        requiredClaims: {
-          id: 'example-claim-1',
-          input_descriptors: [
-            {
-              id: 'example-descriptor-1',
-              constraints: {
-                fields: [
-                  {
-                    path: ['$.type[*]'],
-                    filter: {
-                      type: 'string',
-                      pattern: '^KnownBusinessCredential$',
-                    },
-                  },
-                ],
-              },
-            },
-          ],
-        },
       },
     })
 
@@ -179,25 +160,6 @@ async function main() {
               kind: 'WIRE_TRANSFER',
               requiredPaymentDetails: {},
               estimatedSettlementTime: 10
-            },
-          ],
-        },
-        requiredClaims: {
-          id: 'example-claim-2',
-          input_descriptors: [
-            {
-              id: 'example-descriptor-2',
-              constraints: {
-                fields: [
-                  {
-                    path: ['$.type[*]'],
-                    filter: {
-                      type: 'string',
-                      pattern: '^KnownCustomerCredential$',
-                    },
-                  },
-                ],
-              },
             },
           ],
         },
