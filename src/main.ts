@@ -8,6 +8,7 @@ import {
   Postgres,
   ExchangeRepository,
   OfferingRepository,
+  BalancesRepository,
 } from './db/index.js'
 import { HttpServerShutdownHandler } from './http-shutdown-handler.js'
 import { TbdexHttpServer } from '@tbdex/http-server'
@@ -57,6 +58,7 @@ process.on('SIGTERM', async () => {
 const httpApi = new TbdexHttpServer({
   exchangesApi: ExchangeRepository,
   offeringsApi: OfferingRepository,
+  balancesApi: BalancesRepository,
   pfiDid: config.pfiDid.uri,
 })
 
@@ -71,6 +73,8 @@ httpApi.onSubmitOrder(async (ctx, order) => {
 httpApi.onSubmitClose(async (ctx, close) => {
   await ExchangeRepository.addMessage({ message: close as Close })
 })
+
+
 
 const server = httpApi.listen(config.port, () => {
   log.info(`Mock PFI listening on port ${config.port}`)
