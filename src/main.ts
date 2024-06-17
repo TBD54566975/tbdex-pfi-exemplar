@@ -13,7 +13,9 @@ import {
 import { HttpServerShutdownHandler } from './http-shutdown-handler.js'
 import { TbdexHttpServer } from '@tbdex/http-server'
 import { DidDht } from '@web5/dids'
-
+import { BearerDid } from '@web5/dids'
+import { createOrLoadDid } from './example/utils.js'
+import { VerifiableCredential } from '@web5/credentials'
 
 await Postgres.connect()
 
@@ -74,7 +76,22 @@ httpApi.onSubmitClose(async (ctx, close) => {
   await ExchangeRepository.addMessage({ message: close as Close })
 })
 
+httpApi.api.post('/get-vc', async function(req, res) {
+  const issuer : BearerDid = await createOrLoadDid('issuer.json')
 
+  // Create a sanctions credential so that the PFI knows that Alice is legit.
+  const vc = await VerifiableCredential.create({
+    type    : 'SanctionCredential',
+    issuer  : issuer.uri,
+    subject : req.body.did,
+    data    : {
+      'beep': 'boop'
+    }
+  })
+
+  const vcJwt = await vc.sign({ did: issuer})
+  res.send(vcJwt)
+})
 
 const server = httpApi.listen(config.port, () => {
   log.info(`Mock PFI listening on port ${config.port}`)
