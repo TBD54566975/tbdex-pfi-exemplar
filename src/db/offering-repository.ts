@@ -40,6 +40,7 @@ export class _OfferingRepository implements OfferingsApi {
 
     const offerings: Offering[] = []
     for (let result of results) {
+      console.log('result:', result)
       const offering = (await Parser.parseResource(
         result.offering,
       )) as Offering

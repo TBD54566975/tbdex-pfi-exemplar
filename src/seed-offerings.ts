@@ -85,6 +85,13 @@ async function main() {
 
         requiredClaims: {
           id: '7ce4004c-3c38-4853-968b-e411bafcd945',
+          name: 'Sanctions Check',
+          purpose: 'Need to check not on a sanctions customer.',
+          format: {
+            jwt_vc: {
+              alg: ['ES256K', 'EdDSA']
+            }
+          },
           input_descriptors: [
             {
               id: 'bbdb9b7c-5754-4f46-b63b-590bada959e0',
@@ -211,6 +218,11 @@ async function main() {
         },
         requiredClaims: {
           id: 'example-claim-3',
+          format: {
+            jwt_vc: {
+              alg: ['ES256K', 'EdDSA']
+            }
+          },
           input_descriptors: [
             {
               id: 'example-descriptor-3',
@@ -239,6 +251,7 @@ async function main() {
     })
 
     await offering1.sign(config.pfiDid)
+    await offering1.verifySignature()
     await OfferingRepository.create(offering1)
 
     await offering2.sign(config.pfiDid)
@@ -252,6 +265,7 @@ async function main() {
 
   } catch (error) {
     console.error('Error reading issuer DID or creating offering:', error)
+    throw error
   }
 }
 
