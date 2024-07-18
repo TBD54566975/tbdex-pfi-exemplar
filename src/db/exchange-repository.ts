@@ -1,6 +1,5 @@
-import { Message, Close, Order, OrderStatus, Quote, ExchangesApi, Rfq, Parser, Exchange, Offering } from '@tbdex/http-server'
+import { Message, Close, Order, OrderStatus, Quote, ExchangesApi, Rfq, Parser, Exchange } from '@tbdex/http-server'
 import type { MessageModel, MessageKind, GetExchangesFilter } from '@tbdex/http-server'
-import { OfferingRepository } from './offering-repository.js'
 import { Postgres } from './postgres.js'
 import { config } from '../config.js'
 import { BalancesRepository } from './balances-repository.js'
@@ -9,7 +8,7 @@ class _ExchangeRepository implements ExchangesApi {
 
   async getExchanges(opts: { filter: GetExchangesFilter }): Promise<Exchange[]> {
     // TODO: try out GROUP BY! would do it now, just unsure what the return structure looks like
-    const exchangeIds = opts.filter.id?.length ? opts.filter.id : []
+    const exchangeIds = opts.filter.from?.length ? opts.filter.from : []
 
     if (exchangeIds.length == 0) {
       return await this.getAllExchanges()
