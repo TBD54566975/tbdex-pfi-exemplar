@@ -1,7 +1,5 @@
 import type { Database } from './types.js' // this is the Database interface we defined earlier
 
-import log from '../logger.js'
-
 import { Kysely, PostgresDialect } from 'kysely'
 import { config } from '../config.js'
 import pg from 'pg'
