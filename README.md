@@ -67,19 +67,14 @@ based on your OS' package manager.
 > Make sure you have all the [prerequisites](#development-prerequisites)
 
 1. Clone the repo and `cd` into the project directory
-2. `./db/scripts/start-pg` from your command line to start a `psql` container by
-   running.
-3. `./db/scripts/migrate` to perform database migrations
+2. `./db/scripts/start-pg` from your command line to start a `psql` container
+3. `./db/scripts/migrate` to perform database setup or migrations
    * This only needs to be done once and then whenever changes are made in
      `db/migrations`.
 4. `npm install` to install all project dependencies
 5. `cp .env.example .env`.
    * This is where you can set any necessary environment variables.
      `.env.example` contains all environment variables that you _can_ set.
-6. `npm run server` and ensure this is running
-
-> [!NOTE]
-> (optional) If you want to run this over a network, please set HOST environment to an appropriate name that clients can connect to, as this will be set in the PFIs did as a `serviceEndpoint` (otherwise it defaults to http://localhost:9000)
 
 ## Running end-to-end PFI tutorial
 In this tutorial we will set up an issuer to issue Sanction Check VCs, as well
@@ -98,7 +93,7 @@ npm run example-create-issuer
 Creates a new VC issuer, which will be needed by the PFI.
 
 > [!NOTE]
->`issuer.json` stores the private key info for the issuer, `issuerDid.txt` has the public did which will be trusted by the PFI. 
+>`issuer.json` stores the private key info for the issuer, `issuerDid.txt` has the public DID which will be trusted by the PFI. 
 
 ### Step 3: Configure the PFI database with offerings and VC issuer
 
@@ -132,6 +127,9 @@ Run the server (or restart it) in another terminal window:
 ```bash
 npm run server
 ```
+
+> [!NOTE]
+> (optional) If you want to run this over a network, please set HOST environment to an appropriate name that clients can connect to, as this will be set in the PFIs did as a `serviceEndpoint` (otherwise it defaults to http://localhost:9000)
 
 ### Step 7: Run a tbDEX exchange
 Run a tbDEX transaction (or exchange):

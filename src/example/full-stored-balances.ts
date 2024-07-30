@@ -14,19 +14,14 @@ import fs from 'fs'
 // load pfiDid from pfiDid.txt
 const pfiDid = fs.readFileSync('pfiDid.txt', 'utf-8').trim()
 
-
 const signedCredential = fs.readFileSync('signedCredential.txt', 'utf-8').trim()
 
-//
-//  Connect to the PFI and get the list of offerings (offerings are resources - anyone can ask for them)
-//
+// Connect to the PFI and get the list of offerings (offerings are resources - anyone can ask for them)
 const offerings = await TbdexHttpClient.getOfferings({ pfiDid: pfiDid })
 console.log('got offerings:', JSON.stringify(offerings, null, 2))
 
 
-//
 // Load alice's private key to sign RFQ
-//
 const alice = await createOrLoadDid('alice.json')
 
 const [balances] = await TbdexHttpClient.getBalances({ pfiDid: pfiDid, did: alice })
@@ -48,7 +43,7 @@ const rfq = Rfq.create({
       kind: 'STORED_BALANCE',
       paymentDetails: {},
     },
-    claims: [], // no claims for now - will add in kcc soon
+    claims: [signedCredential],
   },
 })
 
@@ -63,7 +58,7 @@ console.log('sent RFQ: ', JSON.stringify(rfq, null, 2))
 
 let quote
 
-//Wait for Quote message to appear in the exchange
+// Wait for Quote message to appear in the exchange
 while (!quote) {
   const exchange = await TbdexHttpClient.getExchange({
     pfiDid: pfiDid,

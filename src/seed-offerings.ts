@@ -18,6 +18,7 @@ async function main() {
     const offering1 = Offering.create({
       metadata: { from: config.pfiDid.uri },
       data: {
+        cancellation: { enabled: false },
         description: 'fake offering 1',
         payoutUnitsPerPayinUnit: '0.0069', // ex. we send 100 dollars, so that means 14550.00 KES
         payin: {
@@ -115,6 +116,7 @@ async function main() {
     const offering2 = Offering.create({
       metadata: { from: config.pfiDid.uri },
       data: {
+        cancellation: { enabled: false },
         description: 'USD to USDC wire transfer to stored balance',
         payoutUnitsPerPayinUnit: '1.00',
         payin: {
@@ -142,6 +144,7 @@ async function main() {
     const offering3 = Offering.create({
       metadata: { from: config.pfiDid.uri },
       data: {
+        cancellation: { enabled: false },
         description: 'USDC to USD wire transfer from stored balance',
         payoutUnitsPerPayinUnit: '1.00',
         payin: {
@@ -169,6 +172,7 @@ async function main() {
     const offering4 = Offering.create({
       metadata: { from: config.pfiDid.uri },
       data: {
+        cancellation: { enabled: false },
         description: 'Stored balance (in USDC) to MOMO_MPESA',
         payoutUnitsPerPayinUnit: '0.0069', // ex. we send 100 dollars, so that means 14550.00 KES
         payin: {
