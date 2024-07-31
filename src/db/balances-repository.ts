@@ -20,13 +20,13 @@ export class _BalancesRepository implements BalancesApi {
   }
 
   withdraw(quote: Quote) {
-    // substract this from available
-    available = (parseFloat(available) - parseFloat(quote.data.payout.amount)).toString()
+    // subtract this from available
+    available = (parseFloat(available) - parseFloat(quote.data.payout.total)).toString()
   }
 
   deposit(quote: Quote) {
     // add this to available
-    available = (parseFloat(available) + parseFloat(quote.data.payin.amount)).toString()
+    available = (parseFloat(available) + parseFloat(quote.data.payin.total)).toString()
   }
 }
 

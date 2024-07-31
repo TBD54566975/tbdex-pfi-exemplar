@@ -1,4 +1,4 @@
-import { Message, Close, Order, OrderStatus, Quote, ExchangesApi, Rfq, Parser, Exchange } from '@tbdex/http-server'
+import { Message, Close, Order, OrderStatus, Quote, ExchangesApi, Rfq, Parser, Exchange, OrderStatusEnum } from '@tbdex/http-server'
 import type { MessageModel, MessageKind, GetExchangesFilter } from '@tbdex/http-server'
 import { Postgres } from './postgres.js'
 import { config } from '../config.js'
@@ -147,13 +147,13 @@ class _ExchangeRepository implements ExchangesApi {
       const rfq = message as Rfq
       let quote: Quote
       if (rfq.data.payin.kind == 'STORED_BALANCE' && rfq.data.payout.kind == 'WIRE_TRANSFER') {
-        quote = await this.withdrawalQuote(rfq)
+        quote = await this.createQuoteForWithdrawal(rfq)
       }
       if (rfq.data.payin.kind == 'WIRE_TRANSFER' && rfq.data.payout.kind == 'STORED_BALANCE') {
-        quote = await this.depositQuote(rfq)
+        quote = await this.createQuoteForDeposit(rfq)
       }
       else {
-        quote = await this.BtcKesQuote(rfq)
+        quote = await this.createBtcToKesQuote(rfq)
       }
       this.addMessage({ message: quote as Quote})
     }
@@ -166,7 +166,7 @@ class _ExchangeRepository implements ExchangesApi {
           exchangeId: message.exchangeId
         },
         data: {
-          orderStatus: 'PROCESSING'
+          status: OrderStatusEnum.PayinPending
         }
       })
       await orderStatus.sign(config.pfiDid)
@@ -181,6 +181,7 @@ class _ExchangeRepository implements ExchangesApi {
 
       await new Promise(resolve => setTimeout(resolve, 1000)) // 1 second delay
 
+      // simulate order completion
       orderStatus = OrderStatus.create({
         metadata: {
           from: config.pfiDid.uri,
@@ -188,7 +189,7 @@ class _ExchangeRepository implements ExchangesApi {
           exchangeId: message.exchangeId
         },
         data: {
-          orderStatus: 'COMPLETED'
+          status: OrderStatusEnum.PayoutSettled
         }
       })
       await orderStatus.sign(config.pfiDid)
@@ -212,7 +213,10 @@ class _ExchangeRepository implements ExchangesApi {
   }
 
 
-  private async depositQuote(rfq: Rfq) {
+  /**
+   * Creates a quote for a deposit into the PFI as a stored balance.
+   */
+  private async createQuoteForDeposit(rfq: Rfq) {
     const quote = Quote.create({
       metadata: {
         from: config.pfiDid.uri,
@@ -221,13 +225,16 @@ class _ExchangeRepository implements ExchangesApi {
       },
       data: {
         expiresAt: new Date(new Date().getTime() + 60 * 60000).toISOString(),
+        payoutUnitsPerPayinUnit: '1',
         payin: {
           currencyCode: 'WIRE_TRANSFER',
-          amount: rfq.data.payin.amount
+          subtotal: rfq.data.payin.amount,
+          total: rfq.data.payin.amount
         },
         payout: {
           currencyCode: 'STORED_BALANCE',
-          amount: rfq.data.payin.amount
+          subtotal: rfq.data.payin.amount,
+          total: rfq.data.payin.amount
         }
       }
     })
@@ -236,7 +243,10 @@ class _ExchangeRepository implements ExchangesApi {
 
   }
 
-  private async withdrawalQuote(rfq: Rfq) {
+  /**
+   * Creates a quote for a withdrawal from the PFI stored balance.
+   */
+  private async createQuoteForWithdrawal(rfq: Rfq) {
     const quote = Quote.create({
       metadata: {
         from: config.pfiDid.uri,
@@ -245,13 +255,17 @@ class _ExchangeRepository implements ExchangesApi {
       },
       data: {
         expiresAt: new Date(new Date().getTime() + 60 * 60000).toISOString(),
+        payoutUnitsPerPayinUnit: '1',
         payin: {
           currencyCode: 'STORED_BALANCE',
-          amount: rfq.data.payin.amount
+          subtotal: rfq.data.payin.amount,
+          total: rfq.data.payin.amount
+
         },
         payout: {
           currencyCode: 'WIRE_TRANSFER',
-          amount: rfq.data.payin.amount
+          subtotal: rfq.data.payin.amount,
+          total: rfq.data.payin.amount
         }
       }
     })
@@ -259,7 +273,10 @@ class _ExchangeRepository implements ExchangesApi {
     return quote
   }
 
-  private async BtcKesQuote(rfq: Rfq) {
+  /**
+   * Creates a quote for a BTC to KES (Kenyan Shilling) exchange.
+   */
+  private async createBtcToKesQuote(rfq: Rfq) {
     const quote = Quote.create({
       metadata: {
         from: config.pfiDid.uri,
@@ -268,13 +285,16 @@ class _ExchangeRepository implements ExchangesApi {
       },
       data: {
         expiresAt: new Date(new Date().getTime() + 60 * 60000).toISOString(),
+        payoutUnitsPerPayinUnit: '123456.789',
         payin: {
           currencyCode: 'BTC',
-          amount: '1000.00'
+          subtotal: '1000.00',
+          total: '1000.00'
         },
         payout: {
           currencyCode: 'KES',
-          amount: '123456789.00'
+          subtotal: '123456789.00',
+          total: '123456789.00'
         }
       }
     })
